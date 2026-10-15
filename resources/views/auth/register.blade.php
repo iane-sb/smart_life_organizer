@@ -19,7 +19,8 @@
                 <label for="name" class="form-label">Full Name</label>
                 <div class="input-icon-wrap">
                     <i data-lucide="user" class="input-icon" style="width:16px;height:16px;"></i>
-                    <input id="name" class="form-control" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" placeholder="John Doe">
+                    <input id="name" class="form-control" type="text" name="name" value="{{ old('name') }}"
+                        required autofocus autocomplete="name" placeholder="Juan Dela Cruz">
                 </div>
             </div>
 
@@ -28,7 +29,8 @@
                 <label for="email" class="form-label">Email Address</label>
                 <div class="input-icon-wrap">
                     <i data-lucide="mail" class="input-icon" style="width:16px;height:16px;"></i>
-                    <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" placeholder="you@example.com">
+                    <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}"
+                        required autocomplete="username" placeholder="you@example.com">
                 </div>
             </div>
 
@@ -37,7 +39,8 @@
                 <label for="password" class="form-label">Password</label>
                 <div class="input-icon-wrap">
                     <i data-lucide="lock" class="input-icon" style="width:16px;height:16px;"></i>
-                    <input id="password" class="form-control" type="password" name="password" required autocomplete="new-password" placeholder="Min. 8 characters">
+                    <input id="password" class="form-control" type="password" name="password" required
+                        autocomplete="new-password" placeholder="Min. 8 characters">
                 </div>
             </div>
 
@@ -46,7 +49,8 @@
                 <label for="password_confirmation" class="form-label">Confirm Password</label>
                 <div class="input-icon-wrap">
                     <i data-lucide="shield-check" class="input-icon" style="width:16px;height:16px;"></i>
-                    <input id="password_confirmation" class="form-control" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Repeat your password">
+                    <input id="password_confirmation" class="form-control" type="password" name="password_confirmation"
+                        required autocomplete="new-password" placeholder="Repeat your password">
                 </div>
             </div>
 
