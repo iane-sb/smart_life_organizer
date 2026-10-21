@@ -83,6 +83,36 @@ class User extends Authenticatable
         return $this->hasMany(Note::class);
     }
 
+    public function fitnessPosts(): HasMany
+    {
+        return $this->hasMany(FitnessPost::class);
+    }
+
+    public function fitnessLikes(): HasMany
+    {
+        return $this->hasMany(FitnessPostLike::class);
+    }
+
+    public function fitnessComments(): HasMany
+    {
+        return $this->hasMany(FitnessPostComment::class);
+    }
+
+    public function fitnessSaves(): HasMany
+    {
+        return $this->hasMany(FitnessPostSave::class);
+    }
+
+    public function fitnessHides(): HasMany
+    {
+        return $this->hasMany(FitnessPostHide::class);
+    }
+
+    public function fitnessReports(): HasMany
+    {
+        return $this->hasMany(FitnessPostReport::class);
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {

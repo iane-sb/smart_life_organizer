@@ -1246,6 +1246,10 @@
                 <i data-lucide="sticky-note"></i>
                 Notes
             </a>
+            <a href="{{ route('fitness.index') }}" class="nav-item {{ request()->routeIs('fitness.*') ? 'active' : '' }}">
+                <i data-lucide="dumbbell"></i>
+                Fitness Community
+            </a>
 
             <div class="nav-section-label">Account</div>
 
@@ -1341,6 +1345,10 @@
         <a href="{{ route('notes.index') }}" class="dock-item {{ request()->routeIs('notes.*') ? 'active' : '' }}">
             <i data-lucide="sticky-note"></i>
             <span>Notes</span>
+        </a>
+        <a href="{{ route('fitness.index') }}" class="dock-item {{ request()->routeIs('fitness.*') ? 'active' : '' }}">
+            <i data-lucide="dumbbell"></i>
+            <span>Fitness</span>
         </a>
         <a href="{{ route('profile.edit') }}" class="dock-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <i data-lucide="user"></i>

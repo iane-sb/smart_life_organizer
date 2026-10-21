@@ -26,7 +26,7 @@
                 <label for="email" class="form-label">Email Address</label>
                 <div class="input-icon-wrap">
                     <i data-lucide="mail" class="input-icon" style="width:16px;height:16px;"></i>
-                    <input id="email" class="form-control" type="email" name="email" value="{{ old('email', 'demo@smartlife.com') }}" required autofocus autocomplete="username" placeholder="you@example.com">
+                    <input id="email" class="form-control" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="you@example.com">
                 </div>
             </div>
 
@@ -40,8 +40,17 @@
                 </div>
                 <div class="input-icon-wrap">
                     <i data-lucide="lock" class="input-icon" style="width:16px;height:16px;"></i>
-                    <input id="password" class="form-control" type="password" name="password" required autocomplete="current-password" placeholder="••••••••" value="password">
+                    <input id="password" class="form-control" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
                 </div>
+            </div>
+
+            <!-- Quick Demo Helper -->
+            <div style="margin-bottom: 16px; display: flex; justify-content: flex-end;">
+                <button type="button" style="background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.3); color: #c4b5fd; font-size: 11.5px; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
+                        onclick="document.getElementById('email').value='demo@smartlife.com'; document.getElementById('password').value='password';">
+                    <i data-lucide="zap" style="width:12px; height:12px;"></i>
+                    Fill Demo Account
+                </button>
             </div>
 
             <!-- Remember Me -->

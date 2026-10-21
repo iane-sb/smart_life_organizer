@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\FitnessCommunityController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
@@ -41,6 +42,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile/export', [ProfileController::class, 'export'])->name('profile.export');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Fitness Community
+    Route::get('/fitness', [FitnessCommunityController::class, 'index'])->name('fitness.index');
+    Route::post('/fitness', [FitnessCommunityController::class, 'store'])->name('fitness.store');
+    Route::post('/fitness/{post}/like', [FitnessCommunityController::class, 'toggleLike'])->name('fitness.like');
+    Route::post('/fitness/{post}/comments', [FitnessCommunityController::class, 'storeComment'])->name('fitness.comment');
+    Route::delete('/fitness/{post}', [FitnessCommunityController::class, 'destroy'])->name('fitness.destroy');
+    Route::delete('/fitness/comments/{comment}', [FitnessCommunityController::class, 'destroyComment'])->name('fitness.comment.destroy');
 });
 
 require __DIR__.'/auth.php';
