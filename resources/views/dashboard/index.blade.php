@@ -137,8 +137,8 @@
         <!-- Progress Ring -->
         <div class="glass-card animate-in" style="padding:24px;">
             <div class="section-title" style="margin-bottom:20px;">🎯 Today's Progress</div>
-            <div style="display:flex;align-items:center;gap:30px;">
-                <canvas id="progressRing" width="140" height="140"></canvas>
+            <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;">
+                <canvas id="progressRing" width="130" height="130" style="max-width:130px;max-height:130px;"></canvas>
                 <div>
                     <div style="font-size:36px;font-weight:800;color:var(--text-primary);">
                         {{ $totalTasks > 0 ? round(($completedToday / max($totalTasks, 1)) * 100) : 0 }}%

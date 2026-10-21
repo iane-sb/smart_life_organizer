@@ -60,13 +60,14 @@ class EventController extends Controller
             'title'          => 'required|string|max:255',
             'description'    => 'nullable|string',
             'category'       => 'required|in:appointment,study,work,personal,other',
-            'color'          => 'required|string|max:10',
+            'color'          => 'nullable|string|max:10',
             'start_datetime' => 'required|date',
             'end_datetime'   => 'nullable|date|after_or_equal:start_datetime',
             'is_all_day'     => 'boolean',
         ]);
 
         $validated['user_id'] = Auth::id();
+        $validated['color']   = $validated['color'] ?? '#7c3aed';
         Event::create($validated);
 
         return redirect()->route('calendar.index')->with('success', 'Event created!');

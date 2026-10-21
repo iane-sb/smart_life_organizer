@@ -62,11 +62,12 @@
         <div class="auth-footer" style="margin-top:0;">
             Don't have an account? <a href="{{ route('register') }}" class="auth-link">Create an account</a>
         </div>
-
-        <div style="margin-top:20px; padding:12px; background:rgba(124,58,237,0.08); border:1px dashed rgba(124,58,237,0.3); border-radius:8px; font-size:12px; color:var(--text-secondary);">
-            <strong style="color:#c4b5fd;">Demo Account Pre-filled:</strong><br>
-            Email: <code style="color:#a78bfa;">demo@smartlife.com</code><br>
-            Password: <code style="color:#a78bfa;">password</code>
+        
+        <div style="margin-top:20px; padding:12px; background:rgba(124,58,237,0.08); border:1px dashed rgba(124,58,237,0.3); border-radius:8px; font-size:12px; color:var(--text-secondary); text-align:center;">
+            <span style="color:#c4b5fd;">
+                &copy; 2026 Smart Life Organizer. All Rights Reserved.
+            </span>
         </div>
+        
     </div>
 </x-guest-layout>

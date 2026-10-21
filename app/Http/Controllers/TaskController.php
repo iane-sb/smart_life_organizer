@@ -24,7 +24,7 @@ class TaskController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        $tasks = $query->orderByRaw("FIELD(priority, 'urgent', 'high', 'medium', 'low')")
+        $tasks = $query->orderByPriority()
                        ->orderBy('due_date')
                        ->get();
 

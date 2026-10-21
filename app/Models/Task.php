@@ -29,6 +29,11 @@ class Task extends Model
         return $query->where('user_id', $userId);
     }
 
+    public function scopeOrderByPriority($query)
+    {
+        return $query->orderByRaw("CASE priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 WHEN 'low' THEN 4 ELSE 5 END");
+    }
+
     public function isOverdue(): bool
     {
         return $this->due_date &&

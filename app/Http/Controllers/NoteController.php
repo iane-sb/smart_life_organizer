@@ -32,10 +32,11 @@ class NoteController extends Controller
         $validated = $request->validate([
             'title'   => 'required|string|max:255',
             'content' => 'nullable|string',
-            'color'   => 'required|string|max:10',
+            'color'   => 'nullable|string|max:10',
         ]);
 
         $validated['user_id'] = Auth::id();
+        $validated['color']   = $validated['color'] ?? '#7c3aed';
         Note::create($validated);
 
         return redirect()->route('notes.index')->with('success', 'Note created!');

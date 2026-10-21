@@ -30,7 +30,7 @@ class DashboardController extends Controller
                 $q->whereDate('due_date', $today)
                   ->orWhereNull('due_date');
             })
-            ->orderByRaw("FIELD(priority, 'urgent', 'high', 'medium', 'low')")
+            ->orderByPriority()
             ->take(6)
             ->get();
 

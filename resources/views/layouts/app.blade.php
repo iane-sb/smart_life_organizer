@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      data-theme="{{ (Auth::user()?->theme_preference ?? 'dark') === 'light' ? 'light' : 'dark' }}"
+      data-theme-preference="{{ Auth::user()?->theme_preference ?? 'dark' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,15 +23,75 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Theme Management Scripts -->
+    <script>
+        (function() {
+            window.getResolvedTheme = function(pref) {
+                if (pref === 'system') {
+                    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+                }
+                return pref === 'light' ? 'light' : 'dark';
+            };
+
+            const userPref = "{{ Auth::user()->theme_preference ?? 'dark' }}";
+            const stored = localStorage.getItem('theme_preference') || userPref || 'dark';
+            const effective = window.getResolvedTheme(stored);
+
+            document.documentElement.setAttribute('data-theme', effective);
+            document.documentElement.setAttribute('data-theme-preference', stored);
+
+            window.applyThemePreference = function(pref) {
+                if (!['dark', 'light', 'system'].includes(pref)) {
+                    pref = 'dark';
+                }
+                localStorage.setItem('theme_preference', pref);
+                document.documentElement.setAttribute('data-theme-preference', pref);
+                const resolved = window.getResolvedTheme(pref);
+                document.documentElement.setAttribute('data-theme', resolved);
+
+                if (typeof window.updateHeaderThemeIcons === 'function') {
+                    window.updateHeaderThemeIcons(pref, resolved);
+                }
+
+                window.dispatchEvent(new CustomEvent('themechanged', { detail: { preference: pref, resolved: resolved } }));
+            };
+
+            window.cycleThemePreference = function() {
+                const current = document.documentElement.getAttribute('data-theme-preference') || 'dark';
+                const cycle = { 'dark': 'light', 'light': 'system', 'system': 'dark' };
+                const next = cycle[current] || 'dark';
+                window.applyThemePreference(next);
+            };
+
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+                    if (document.documentElement.getAttribute('data-theme-preference') === 'system') {
+                        const newTheme = e.matches ? 'light' : 'dark';
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        if (typeof window.updateHeaderThemeIcons === 'function') {
+                            window.updateHeaderThemeIcons('system', newTheme);
+                        }
+                        window.dispatchEvent(new CustomEvent('themechanged', { detail: { preference: 'system', resolved: newTheme } }));
+                    }
+                });
+            }
+        })();
+    </script>
+
     <style>
         /* ===== CSS VARIABLES & RESET ===== */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        :root {
+        /* ===== DARK THEME (DEFAULT) ===== */
+        :root, [data-theme="dark"] {
             --bg-primary:    #0d0f1a;
             --bg-secondary:  #13162b;
             --bg-card:       rgba(255, 255, 255, 0.04);
             --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --sidebar-bg:    rgba(13, 15, 26, 0.85);
+            --header-bg:     rgba(13, 15, 26, 0.6);
+            --modal-bg:      #13162b;
+            --dock-bg:       rgba(13, 15, 26, 0.92);
             --border:        rgba(255, 255, 255, 0.08);
             --border-hover:  rgba(255, 255, 255, 0.16);
             --text-primary:  #f1f5f9;
@@ -52,8 +114,68 @@
             --radius-xl: 28px;
             --shadow-glow: 0 0 30px rgba(124, 58, 237, 0.15);
             --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --input-bg:      rgba(255, 255, 255, 0.05);
+            --input-border:  rgba(255, 255, 255, 0.08);
+            --input-option-bg: #1a1d2e;
+            --tab-group-bg:  rgba(255, 255, 255, 0.04);
+            --cal-header-bg: rgba(255, 255, 255, 0.03);
             --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        /* ===== LIGHT THEME ===== */
+        [data-theme="light"] {
+            --bg-primary:    #f8fafc;
+            --bg-secondary:  #ffffff;
+            --bg-card:       rgba(255, 255, 255, 0.85);
+            --bg-card-hover: rgba(255, 255, 255, 0.98);
+            --sidebar-bg:    rgba(255, 255, 255, 0.9);
+            --header-bg:     rgba(255, 255, 255, 0.85);
+            --modal-bg:      #ffffff;
+            --dock-bg:       rgba(255, 255, 255, 0.94);
+            --border:        rgba(203, 213, 225, 0.7);
+            --border-hover:  rgba(148, 163, 184, 0.6);
+            --text-primary:  #0f172a;
+            --text-secondary:#334155;
+            --text-muted:    #64748b;
+            --accent-purple: #7c3aed;
+            --accent-blue:   #2563eb;
+            --accent-teal:   #0891b2;
+            --accent-pink:   #db2777;
+            --accent-amber:  #d97706;
+            --accent-green:  #059669;
+            --accent-red:    #dc2626;
+            --gradient-main: radial-gradient(ellipse at 15% 40%, rgba(124, 58, 237, 0.07) 0%, transparent 60%), radial-gradient(ellipse at 85% 20%, rgba(37, 99, 235, 0.06) 0%, transparent 50%), linear-gradient(135deg, #f8fafc 0%, #eef2f6 50%, #f1f5f9 100%);
+            --gradient-accent: linear-gradient(135deg, #7c3aed, #2563eb);
+            --shadow-glow: 0 0 25px rgba(124, 58, 237, 0.12);
+            --shadow-card: 0 8px 30px rgba(15, 23, 42, 0.07);
+            --input-bg:      rgba(255, 255, 255, 0.95);
+            --input-border:  rgba(203, 213, 225, 0.85);
+            --input-option-bg: #ffffff;
+            --tab-group-bg:  rgba(0, 0, 0, 0.05);
+            --cal-header-bg: rgba(0, 0, 0, 0.03);
+        }
+
+        /* High-contrast and crisp light theme adjustments */
+        [data-theme="light"] .badge-purple { color: #7c3aed; background: rgba(124, 58, 237, 0.1); border-color: rgba(124, 58, 237, 0.25); }
+        [data-theme="light"] .badge-blue   { color: #1d4ed8; background: rgba(37, 99, 235, 0.1); border-color: rgba(37, 99, 235, 0.25); }
+        [data-theme="light"] .badge-green  { color: #047857; background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); }
+        [data-theme="light"] .badge-amber  { color: #b45309; background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.25); }
+        [data-theme="light"] .badge-red    { color: #dc2626; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.25); }
+        [data-theme="light"] .priority-urgent { color: #dc2626; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.25); }
+        [data-theme="light"] .priority-high   { color: #b45309; background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.25); }
+        [data-theme="light"] .priority-medium { color: #4338ca; background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.25); }
+        [data-theme="light"] .priority-low    { color: #047857; background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); }
+        [data-theme="light"] .status-completed { color: #047857; background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); }
+        [data-theme="light"] .status-in_progress { color: #1d4ed8; background: rgba(37, 99, 235, 0.1); border-color: rgba(37, 99, 235, 0.25); }
+        [data-theme="light"] .status-pending { color: #475569; background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.25); }
+        [data-theme="light"] .nav-item.active { background: rgba(124, 58, 237, 0.1); color: #7c3aed; border-color: rgba(124, 58, 237, 0.25); }
+        [data-theme="light"] .cal-day.today { background: rgba(124, 58, 237, 0.08); }
+        [data-theme="light"] .streak-badge { background: rgba(245, 158, 11, 0.1); color: #b45309; border-color: rgba(245, 158, 11, 0.3); }
+        [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }
+        [data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
+        [data-theme="light"] .kanban-card { background: #ffffff; }
+        [data-theme="light"] .kanban-card:hover { background: #f8fafc; }
+        [data-theme="light"] .kanban-count { background: rgba(0, 0, 0, 0.06); color: var(--text-secondary); }
 
         html, body {
             height: 100%;
@@ -84,7 +206,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: rgba(13, 15, 26, 0.8);
+            background: var(--sidebar-bg);
             backdrop-filter: blur(30px);
             border-right: 1px solid var(--border);
             flex-shrink: 0;
@@ -238,7 +360,7 @@
             justify-content: space-between;
             padding: 0 28px;
             border-bottom: 1px solid var(--border);
-            background: rgba(13, 15, 26, 0.5);
+            background: var(--header-bg);
             backdrop-filter: blur(20px);
             flex-shrink: 0;
         }
@@ -378,8 +500,8 @@
         .form-control {
             width: 100%;
             padding: 10px 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
             border-radius: var(--radius-sm);
             color: var(--text-primary);
             font-size: 13px;
@@ -390,11 +512,11 @@
 
         .form-control:focus {
             border-color: var(--accent-purple);
-            background: rgba(124, 58, 237, 0.05);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+            background: var(--input-bg);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
         }
 
-        .form-control option { background: #1a1d2e; color: var(--text-primary); }
+        .form-control option { background: var(--input-option-bg); color: var(--text-primary); }
 
         select.form-control { cursor: pointer; }
         textarea.form-control { resize: vertical; min-height: 90px; }
@@ -413,7 +535,7 @@
         }
 
         .modal-box {
-            background: #13162b;
+            background: var(--modal-bg);
             border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             padding: 28px;
@@ -597,7 +719,7 @@
         .tab-group {
             display: flex;
             gap: 4px;
-            background: rgba(255,255,255,0.04);
+            background: var(--tab-group-bg);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             padding: 4px;
@@ -660,17 +782,17 @@
         }
         .kanban-items { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
         .kanban-card {
-            background: rgba(255,255,255,0.04);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 14px;
             transition: all var(--transition);
         }
         .kanban-card:hover {
-            background: rgba(255,255,255,0.07);
+            background: var(--bg-card-hover);
             border-color: var(--border-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
 
         /* ===== OVERDUE ===== */
@@ -693,7 +815,7 @@
             overflow: hidden;
         }
         .cal-day-header {
-            background: rgba(255,255,255,0.03);
+            background: var(--cal-header-bg);
             padding: 10px 6px;
             text-align: center;
             font-size: 11px;
@@ -710,7 +832,7 @@
             transition: background var(--transition);
             position: relative;
         }
-        .cal-day:hover { background: rgba(255,255,255,0.05); }
+        .cal-day:hover { background: var(--bg-card-hover); }
         .cal-day.other-month { opacity: 0.35; }
         .cal-day.today { background: rgba(124,58,237,0.08); }
         .cal-day.today .cal-day-num { background: var(--accent-purple); color: white; }
@@ -794,17 +916,269 @@
             font-weight: 700;
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1100px) {
-            .grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .kanban-board { grid-template-columns: 1fr; }
-            .notes-grid { columns: 2; }
+        /* ===== MODAL & OVERLAY ===== */
+        .modal-overlay, .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
         }
+
+        .modal-box {
+            background: var(--modal-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            width: min(540px, 95vw);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.6), var(--shadow-glow);
+            animation: modalIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .modal-close:hover { color: var(--text-primary); background: rgba(255,255,255,0.15); }
+
+        .modal-body { margin-bottom: 20px; }
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ===== MOBILE HAMBURGER & DRAWER ===== */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition);
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+        }
+
+        .sidebar-close-btn {
+            display: none;
+            margin-left: auto;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .sidebar-close-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.12);
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ===== MOBILE BOTTOM DOCK ===== */
+        .mobile-bottom-dock {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--dock-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid var(--border);
+            z-index: 900;
+            padding: 4px 8px;
+            box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.2);
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .dock-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 12px;
+            transition: all var(--transition);
+            flex: 1;
+            max-width: 68px;
+        }
+        .dock-item i { width: 18px; height: 18px; }
+        .dock-item.active {
+            color: #c4b5fd;
+            background: rgba(124, 58, 237, 0.18);
+        }
+        .dock-item.active i { stroke: #a78bfa; }
+
+        /* ===== RESPONSIVE MEDIA QUERIES ===== */
+        @media (max-width: 1200px) {
+            .notes-grid { columns: 3; }
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-menu-btn { display: inline-flex; }
+            .sidebar-close-btn { display: inline-flex; }
+            .sidebar-backdrop { display: block; }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 270px;
+                max-width: 82vw;
+                transform: translateX(-100%);
+                transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 0 50px rgba(0,0,0,0.85);
+                z-index: 9999;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+            .notes-grid { columns: 2; column-gap: 16px; }
+
+            .kanban-board {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: minmax(280px, 1fr);
+                overflow-x: auto;
+                padding-bottom: 14px;
+                scroll-snap-type: x mandatory;
+                gap: 16px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .kanban-col {
+                scroll-snap-align: start;
+                min-width: 280px;
+            }
+        }
+
         @media (max-width: 768px) {
-            :root { --sidebar-width: 0px; }
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .mobile-bottom-dock { display: flex; }
+            .page-content { padding: 18px 16px 86px 16px; }
+
+            .top-header {
+                padding: 0 16px;
+                height: 60px;
+            }
+
+            .header-greeting h1 {
+                font-size: 15px;
+                max-width: 180px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .header-date { display: none; }
+            .header-clock { display: none; }
+
+            .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 16px; }
+
+            .filter-bar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .filter-bar .form-control {
+                flex: 1 1 130px;
+                width: auto !important;
+            }
+
+            .modal-box {
+                padding: 22px 18px;
+                border-radius: var(--radius-lg);
+            }
+
+            .note-actions {
+                opacity: 1 !important;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-card { padding: 12px 14px; }
+            .stat-value { font-size: 20px; }
+            .stat-icon { width: 36px; height: 36px; }
+
             .notes-grid { columns: 1; }
-            .page-content { padding: 16px; }
+
+            .kanban-board {
+                grid-auto-columns: minmax(84vw, 1fr);
+            }
+
+            .header-greeting h1 {
+                max-width: 140px;
+                font-size: 14px;
+            }
+
+            .tab-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+
+        @media (hover: none) {
+            .note-actions {
+                opacity: 1 !important;
+            }
         }
 
         /* ===== ANIMATIONS ===== */
@@ -834,9 +1208,12 @@
     @stack('styles')
 </head>
 <body>
-<div class="app-shell">
+<div class="app-shell" x-data="{ mobileNavOpen: false }">
+    <!-- Mobile Backdrop -->
+    <div class="sidebar-backdrop" :class="{ 'active': mobileNavOpen }" @click="mobileNavOpen = false"></div>
+
     <!-- ===== SIDEBAR ===== -->
-    <aside class="sidebar">
+    <aside class="sidebar" :class="{ 'mobile-open': mobileNavOpen }">
         <div class="sidebar-logo">
             <div class="logo-icon">
                 <i data-lucide="zap" style="color:white; width:20px; height:20px;"></i>
@@ -845,6 +1222,9 @@
                 <div class="logo-text">Smart Life</div>
                 <div class="logo-sub">Organizer</div>
             </div>
+            <button type="button" class="sidebar-close-btn" @click="mobileNavOpen = false" aria-label="Close navigation menu">
+                <i data-lucide="x" style="width:18px;height:18px;"></i>
+            </button>
         </div>
 
         <nav class="sidebar-nav">
@@ -885,7 +1265,9 @@
 
         <div class="sidebar-footer">
             <div class="user-card">
-                <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+                <div class="user-avatar" style="overflow:hidden; padding:0;">
+                    <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                </div>
                 <div class="user-info">
                     <div class="user-name">{{ Auth::user()->name }}</div>
                     <div class="user-email">{{ Auth::user()->email }}</div>
@@ -898,11 +1280,26 @@
     <div class="main-content">
         <!-- Top Header -->
         <header class="top-header">
-            <div class="header-greeting">
-                <h1>@yield('page-title', 'Dashboard')</h1>
-                <p x-data="{}" x-text="new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'})"></p>
+            <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+                <button type="button" class="mobile-menu-btn" @click="mobileNavOpen = true" aria-label="Open navigation menu">
+                    <i data-lucide="menu" style="width:20px;height:20px;"></i>
+                </button>
+                <div class="header-greeting" style="min-width:0;">
+                    <h1>@yield('page-title', 'Dashboard')</h1>
+                    <p class="header-date" x-data="{}" x-text="new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'})"></p>
+                </div>
             </div>
             <div class="header-actions">
+                <!-- Theme Toggle Button -->
+                <button type="button" id="header-theme-toggle-btn" class="btn-icon" onclick="window.cycleThemePreference()"
+                        title="Toggle theme (Dark / Light / System)"
+                        aria-label="Toggle color theme"
+                        style="position: relative; width: 34px; height: 34px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <span id="header-theme-icon-moon" style="display: none; line-height: 0;"><i data-lucide="moon" style="width: 17px; height: 17px;"></i></span>
+                    <span id="header-theme-icon-sun" style="display: none; line-height: 0;"><i data-lucide="sun" style="width: 17px; height: 17px; color: #f59e0b;"></i></span>
+                    <span id="header-theme-icon-system" style="display: none; line-height: 0;"><i data-lucide="monitor" style="width: 17px; height: 17px; color: #10b981;"></i></span>
+                </button>
+
                 <span class="header-clock" x-data="{ time: '' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}), 1000); time = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})" x-text="time"></span>
                 @yield('header-actions')
             </div>
@@ -926,10 +1323,63 @@
             @yield('content')
         </div>
     </div>
+
+    <!-- ===== MOBILE BOTTOM NAVIGATION DOCK ===== -->
+    <nav class="mobile-bottom-dock">
+        <a href="{{ route('dashboard') }}" class="dock-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ route('tasks.index') }}" class="dock-item {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
+            <i data-lucide="check-square"></i>
+            <span>Tasks</span>
+        </a>
+        <a href="{{ route('calendar.index') }}" class="dock-item {{ request()->routeIs('calendar.*') ? 'active' : '' }}">
+            <i data-lucide="calendar"></i>
+            <span>Calendar</span>
+        </a>
+        <a href="{{ route('notes.index') }}" class="dock-item {{ request()->routeIs('notes.*') ? 'active' : '' }}">
+            <i data-lucide="sticky-note"></i>
+            <span>Notes</span>
+        </a>
+        <a href="{{ route('profile.edit') }}" class="dock-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
 </div>
 
 <script>
+    window.updateHeaderThemeIcons = function(pref, resolved) {
+        const iconMoon = document.getElementById('header-theme-icon-moon');
+        const iconSun = document.getElementById('header-theme-icon-sun');
+        const iconSys = document.getElementById('header-theme-icon-system');
+        const btn = document.getElementById('header-theme-toggle-btn');
+        if (!iconMoon || !iconSun || !iconSys) return;
+
+        iconMoon.style.display = 'none';
+        iconSun.style.display = 'none';
+        iconSys.style.display = 'none';
+
+        if (pref === 'system') {
+            iconSys.style.display = 'inline-block';
+            if (btn) btn.title = 'Current Theme: System (' + resolved + ') — Click to switch to Dark';
+        } else if (resolved === 'light') {
+            iconSun.style.display = 'inline-block';
+            if (btn) btn.title = 'Current Theme: Light — Click to switch to System';
+        } else {
+            iconMoon.style.display = 'inline-block';
+            if (btn) btn.title = 'Current Theme: Dark — Click to switch to Light';
+        }
+    };
+
     lucide.createIcons();
+
+    (function() {
+        const pref = document.documentElement.getAttribute('data-theme-preference') || 'dark';
+        const resolved = document.documentElement.getAttribute('data-theme') || 'dark';
+        window.updateHeaderThemeIcons(pref, resolved);
+    })();
 </script>
 @stack('scripts')
 </body>

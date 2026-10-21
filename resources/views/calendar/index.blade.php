@@ -36,43 +36,45 @@
         </div>
     </div>
 
-    <div style="padding:16px;">
-        <!-- Day Headers -->
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:2px;">
-            @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $day)
-            <div class="cal-day-header">{{ $day }}</div>
-            @endforeach
-        </div>
-
-        <!-- Calendar Grid -->
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">
-            @php
-                $current = $monthStart->copy();
-                $today = now()->startOfDay();
-            @endphp
-            @while($current <= $monthEnd)
-            @php
-                $dateKey = $current->format('Y-m-d');
-                $isToday = $current->isSameDay($today);
-                $isCurrentMonth = $current->month === $monthDate->month;
-            @endphp
-            <div class="cal-day {{ !$isCurrentMonth ? 'other-month' : '' }} {{ $isToday ? 'today' : '' }}"
-                 onclick="openCreateForDate('{{ $dateKey }}')">
-                <div class="cal-day-num">{{ $current->day }}</div>
-                @if(isset($monthEvents[$dateKey]))
-                    @foreach($monthEvents[$dateKey]->take(3) as $event)
-                    <span class="cal-event-dot" style="background:{{ $event->color }};"
-                          onclick="event.stopPropagation(); openEditEvent({{ $event->id }}, '{{ addslashes($event->title) }}', '{{ addslashes($event->description ?? '') }}', '{{ $event->category }}', '{{ $event->color }}', '{{ $event->start_datetime->format('Y-m-d\TH:i') }}', '{{ $event->end_datetime?->format('Y-m-d\TH:i') ?? '' }}')">
-                        {{ $event->title }}
-                    </span>
-                    @endforeach
-                    @if($monthEvents[$dateKey]->count() > 3)
-                        <span style="font-size:10px;color:var(--text-muted);padding:1px 4px;">+{{ $monthEvents[$dateKey]->count() - 3 }} more</span>
-                    @endif
-                @endif
+    <div style="padding:16px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <div style="min-width: 580px;">
+            <!-- Day Headers -->
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:2px;">
+                @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $day)
+                <div class="cal-day-header">{{ $day }}</div>
+                @endforeach
             </div>
-            @php $current->addDay() @endphp
-            @endwhile
+
+            <!-- Calendar Grid -->
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">
+                @php
+                    $current = $monthStart->copy();
+                    $today = now()->startOfDay();
+                @endphp
+                @while($current <= $monthEnd)
+                @php
+                    $dateKey = $current->format('Y-m-d');
+                    $isToday = $current->isSameDay($today);
+                    $isCurrentMonth = $current->month === $monthDate->month;
+                @endphp
+                <div class="cal-day {{ !$isCurrentMonth ? 'other-month' : '' }} {{ $isToday ? 'today' : '' }}"
+                     onclick="openCreateForDate('{{ $dateKey }}')">
+                    <div class="cal-day-num">{{ $current->day }}</div>
+                    @if(isset($monthEvents[$dateKey]))
+                        @foreach($monthEvents[$dateKey]->take(3) as $event)
+                        <span class="cal-event-dot" style="background:{{ $event->color }};"
+                              onclick="event.stopPropagation(); openEditEvent({{ $event->id }}, '{{ addslashes($event->title) }}', '{{ addslashes($event->description ?? '') }}', '{{ $event->category }}', '{{ $event->color }}', '{{ $event->start_datetime->format('Y-m-d\TH:i') }}', '{{ $event->end_datetime?->format('Y-m-d\TH:i') ?? '' }}')">
+                            {{ $event->title }}
+                        </span>
+                        @endforeach
+                        @if($monthEvents[$dateKey]->count() > 3)
+                            <span style="font-size:10px;color:var(--text-muted);padding:1px 4px;">+{{ $monthEvents[$dateKey]->count() - 3 }} more</span>
+                        @endif
+                    @endif
+                </div>
+                @php $current->addDay() @endphp
+                @endwhile
+            </div>
         </div>
     </div>
 </div>
@@ -94,7 +96,8 @@
             </a>
         </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0;border-top:1px solid var(--border);">
+    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0;border-top:1px solid var(--border);min-width:640px;">
         @php $day = $weekStart->copy(); $today = now()->startOfDay(); @endphp
         @for($i = 0; $i < 7; $i++)
         @php $dateKey = $day->format('Y-m-d'); $isToday = $day->isSameDay($today); @endphp
@@ -118,6 +121,7 @@
         </div>
         @php $day->addDay() @endphp
         @endfor
+        </div>
     </div>
 </div>
 

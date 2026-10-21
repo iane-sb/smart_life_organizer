@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -22,6 +23,21 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'avatar',
+        'username',
+        'phone',
+        'birthday',
+        'bio',
+        'theme_preference',
+        'language',
+        'date_format',
+        'time_format',
+        'notify_email',
+        'notify_tasks',
+        'notify_events',
+        'default_dashboard_view',
+        'two_factor_enabled',
+        'privacy_visibility',
     ];
 
     /**
@@ -42,8 +58,55 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'   => 'datetime',
+            'password'            => 'hashed',
+            'birthday'            => 'date',
+            'notify_email'        => 'boolean',
+            'notify_tasks'        => 'boolean',
+            'notify_events'       => 'boolean',
+            'two_factor_enabled'  => 'boolean',
         ];
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(Note::class);
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+                return $this->avatar;
+            }
+            return asset('storage/' . $this->avatar);
+        }
+
+        // Beautiful SVG avatar fallback via UI-Avatars with purple gradient theme
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=7c3aed&color=ffffff&bold=true&rounded=true&size=128';
+    }
+
+    public function getUsernameDisplayAttribute(): string
+    {
+        if (!empty($this->username)) {
+            return ltrim($this->username, '@');
+        }
+
+        return strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $this->name)) ?: 'user' . $this->id;
+    }
+
+    public function getMemberSinceAttribute(): string
+    {
+        return $this->created_at ? $this->created_at->format('F Y') : 'Recent';
     }
 }

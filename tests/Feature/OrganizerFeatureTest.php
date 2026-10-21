@@ -11,6 +11,8 @@ use Tests\TestCase;
 
 class OrganizerFeatureTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected User $user;
 
     protected function setUp(): void
@@ -23,7 +25,8 @@ class OrganizerFeatureTest extends TestCase
     {
         $response = $this->actingAs($this->user)->get(route('dashboard'));
         $response->assertStatus(200);
-        $response->assertSee('Life Dashboard');
+        $response->assertSeeText("Today's Tasks", false);
+        $response->assertSeeText('Weekly Progress', false);
     }
 
     public function test_tasks_page_renders_and_task_can_be_created(): void
