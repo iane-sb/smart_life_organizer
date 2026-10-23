@@ -62,6 +62,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/fitness/comments/{comment}/hide', [FitnessCommunityController::class, 'unhideComment'])->name('fitness.comment.unhide');
     Route::post('/fitness/comments/{comment}/report', [FitnessCommunityController::class, 'reportComment'])->name('fitness.comment.report');
     Route::get('/fitness/comments/{comment}/copy', [FitnessCommunityController::class, 'copyComment'])->name('fitness.comment.copy');
+    Route::post('/fitness/comments/{comment}/reply', [FitnessCommunityController::class, 'replyComment'])->name('fitness.comment.reply');
+    Route::post('/fitness/comments/{comment}/react', [FitnessCommunityController::class, 'toggleCommentReaction'])->name('fitness.comment.react');
 });
 
 require __DIR__.'/auth.php';

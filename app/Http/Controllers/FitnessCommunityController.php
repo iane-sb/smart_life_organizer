@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FitnessCommentHide;
+use App\Models\FitnessCommentReaction;
 use App\Models\FitnessCommentReport;
 use App\Models\FitnessPost;
 use App\Models\FitnessPostComment;
@@ -14,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -30,16 +32,29 @@ class FitnessCommunityController extends Controller
         $showHidden = $request->boolean('show_hidden');
         $showHiddenComments = $request->boolean('show_hidden_comments');
 
-        $query = FitnessPost::with([
+        $query = FitnessPost::withCount('comments')->with([
             'user',
             'likes',
             'comments' => function ($q) use ($userId, $showHiddenComments) {
+                $q->whereNull('parent_id');
                 if (! $showHiddenComments) {
                     $q->whereDoesntHave('hides', function ($hq) use ($userId) {
                         $hq->where('user_id', $userId);
                     });
                 }
-                $q->with(['user', 'hides']);
+                $q->with([
+                    'user',
+                    'hides',
+                    'reactions',
+                    'replies' => function ($rq) use ($userId, $showHiddenComments) {
+                        if (! $showHiddenComments) {
+                            $rq->whereDoesntHave('hides', function ($hq) use ($userId) {
+                                $hq->where('user_id', $userId);
+                            });
+                        }
+                        $rq->with(['user', 'hides', 'reactions'])->oldest();
+                    },
+                ])->oldest();
             },
             'saves',
             'hides',
@@ -173,7 +188,6 @@ class FitnessCommunityController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
             if ($post->image_path && Storage::disk('public')->exists($post->image_path)) {
                 Storage::disk('public')->delete($post->image_path);
             }
@@ -219,25 +233,90 @@ class FitnessCommunityController extends Controller
     }
 
     /**
-     * Store a comment on a fitness post.
+     * Store a comment (or reply) on a fitness post.
      */
-    public function storeComment(Request $request, FitnessPost $post): RedirectResponse
+    public function storeComment(Request $request, FitnessPost $post): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validate([
+            'comment'   => ['required', 'string', 'max:1000'],
+            'parent_id' => ['nullable', 'integer', 'exists:fitness_post_comments,id'],
+        ]);
+
+        $parentId = null;
+        if (! empty($validated['parent_id'])) {
+            $targetComment = FitnessPostComment::where('fitness_post_id', $post->id)
+                ->where('id', $validated['parent_id'])
+                ->first();
+
+            abort_if(! $targetComment, 422, 'Parent comment does not belong to this post.');
+            abort_if($targetComment->isHiddenBy(Auth::user()), 422, 'Cannot reply to a hidden comment.');
+
+            // Enforce single-level nesting
+            $parentId = $targetComment->parent_id ?: $targetComment->id;
+        }
+
+        $comment = FitnessPostComment::create([
+            'fitness_post_id' => $post->id,
+            'parent_id'       => $parentId,
+            'user_id'         => Auth::id(),
+            'comment'         => $validated['comment'],
+        ]);
+
+        $comment->load(['user', 'reactions']);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success'        => true,
+                'comment'        => $comment,
+                'parent_id'      => $parentId,
+                'message'        => $parentId ? 'Reply posted!' : 'Comment posted!',
+                'comments_count' => FitnessPostComment::where('fitness_post_id', $post->id)->count(),
+            ]);
+        }
+
+        return back()->with('success', $parentId ? 'Your reply was posted!' : 'Your comment was posted!');
+    }
+
+    /**
+     * Reply directly to a comment.
+     */
+    public function replyComment(Request $request, FitnessPostComment $comment): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'comment' => ['required', 'string', 'max:1000'],
         ]);
 
-        FitnessPostComment::create([
+        $userId = Auth::id();
+        abort_if($comment->isHiddenBy(Auth::user()), 422, 'Cannot reply to a hidden comment.');
+
+        // Enforce 1-level reply nesting: if replying to a reply, target the root comment
+        $effectiveParentId = $comment->parent_id ?: $comment->id;
+        $post = $comment->post;
+
+        $reply = FitnessPostComment::create([
             'fitness_post_id' => $post->id,
-            'user_id'         => Auth::id(),
+            'parent_id'       => $effectiveParentId,
+            'user_id'         => $userId,
             'comment'         => $validated['comment'],
         ]);
 
-        return back()->with('success', 'Your comment was posted!');
+        $reply->load(['user', 'reactions']);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success'        => true,
+                'reply'          => $reply,
+                'parent_id'      => $effectiveParentId,
+                'message'        => 'Reply posted!',
+                'comments_count' => FitnessPostComment::where('fitness_post_id', $post->id)->count(),
+            ]);
+        }
+
+        return back()->with('success', 'Your reply was posted!');
     }
 
     /**
-     * Update an existing comment (author only).
+     * Update an existing comment or reply (author only).
      */
     public function updateComment(Request $request, FitnessPostComment $comment): JsonResponse|RedirectResponse
     {
@@ -280,7 +359,7 @@ class FitnessCommunityController extends Controller
     }
 
     /**
-     * Delete a comment (allowed for comment author or parent post owner).
+     * Delete a comment or reply (allowed for comment author or parent post owner).
      */
     public function destroyComment(Request $request, FitnessPostComment $comment): JsonResponse|RedirectResponse
     {
@@ -303,7 +382,7 @@ class FitnessCommunityController extends Controller
     }
 
     /**
-     * Hide a comment from the current user's view.
+     * Hide a comment or reply from the current user's view.
      */
     public function hideComment(Request $request, FitnessPostComment $comment): JsonResponse|RedirectResponse
     {
@@ -326,7 +405,7 @@ class FitnessCommunityController extends Controller
     }
 
     /**
-     * Unhide a comment (restore it to the current user's view).
+     * Unhide a comment or reply (restore it to the current user's view).
      */
     public function unhideComment(Request $request, FitnessPostComment $comment): JsonResponse|RedirectResponse
     {
@@ -347,7 +426,7 @@ class FitnessCommunityController extends Controller
     }
 
     /**
-     * Report a comment (database-backed workflow with duplicate prevention).
+     * Report a comment or reply (database-backed workflow with duplicate prevention).
      */
     public function reportComment(Request $request, FitnessPostComment $comment): JsonResponse|RedirectResponse
     {
@@ -358,7 +437,6 @@ class FitnessCommunityController extends Controller
             'details' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        // Prevent duplicate reports by the same user on the same comment
         $existing = FitnessCommentReport::where('fitness_post_comment_id', $comment->id)
             ->where('user_id', $userId)
             ->first();
@@ -396,6 +474,63 @@ class FitnessCommunityController extends Controller
         return response()->json([
             'comment' => $comment->comment,
         ]);
+    }
+
+    /**
+     * Toggle reaction on a comment or reply (like, love, celebrate, laugh, fire).
+     */
+    public function toggleCommentReaction(Request $request, FitnessPostComment $comment): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validate([
+            'reaction_type' => ['required', 'string', 'in:' . implode(',', FitnessCommentReaction::ALLOWED_TYPES)],
+        ]);
+
+        $userId = Auth::id();
+        $reactionType = $validated['reaction_type'];
+        $userReaction = null;
+
+        // Atomic transaction to prevent race conditions & duplicate reactions
+        DB::transaction(function () use ($comment, $userId, $reactionType, &$userReaction) {
+            $existing = FitnessCommentReaction::where('fitness_post_comment_id', $comment->id)
+                ->where('user_id', $userId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($existing) {
+                if ($existing->reaction_type === $reactionType) {
+                    // Clicking the same reaction removes it
+                    $existing->delete();
+                    $userReaction = null;
+                } else {
+                    // Changing to a different reaction
+                    $existing->update(['reaction_type' => $reactionType]);
+                    $userReaction = $reactionType;
+                }
+            } else {
+                FitnessCommentReaction::create([
+                    'fitness_post_comment_id' => $comment->id,
+                    'user_id'                 => $userId,
+                    'reaction_type'           => $reactionType,
+                ]);
+                $userReaction = $reactionType;
+            }
+        });
+
+        $comment->load('reactions');
+        $reactionCounts = $comment->reactionCounts();
+        $totalReactions = $comment->totalReactions();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success'         => true,
+                'user_reaction'   => $userReaction,
+                'reaction_counts' => $reactionCounts,
+                'total_reactions' => $totalReactions,
+                'message'         => $userReaction ? 'Reaction updated!' : 'Reaction removed.',
+            ]);
+        }
+
+        return back()->with('success', $userReaction ? 'Reaction updated!' : 'Reaction removed.');
     }
 
     /**
@@ -476,7 +611,6 @@ class FitnessCommunityController extends Controller
     {
         $userId = Auth::id();
 
-        // Prevent self-reporting
         abort_if($post->user_id === $userId, 403, 'You cannot report your own post.');
 
         $validated = $request->validate([
@@ -484,7 +618,6 @@ class FitnessCommunityController extends Controller
             'details' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        // Prevent duplicate reports
         $existing = FitnessPostReport::where('fitness_post_id', $post->id)
             ->where('user_id', $userId)
             ->first();

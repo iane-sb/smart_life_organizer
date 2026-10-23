@@ -1030,16 +1030,17 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 64px;
+            height: calc(58px + env(safe-area-inset-bottom, 0px));
             background: var(--dock-bg);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border-top: 1px solid var(--border);
             z-index: 900;
-            padding: 4px 8px;
+            padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px)) 6px;
             box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.2);
             justify-content: space-around;
             align-items: center;
+            box-sizing: border-box;
         }
 
         .dock-item {
@@ -1047,18 +1048,30 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
+            gap: 2px;
             color: var(--text-muted);
             text-decoration: none;
             font-size: 10px;
             font-weight: 500;
-            padding: 6px 10px;
-            border-radius: 12px;
+            padding: 4px 2px;
+            border-radius: 10px;
             transition: all var(--transition);
-            flex: 1;
-            max-width: 68px;
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 72px;
+            text-align: center;
+            box-sizing: border-box;
         }
-        .dock-item i { width: 18px; height: 18px; }
+        .dock-item span {
+            display: block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 10px;
+            line-height: 1.15;
+        }
+        .dock-item i { width: 18px; height: 18px; flex-shrink: 0; }
         .dock-item.active {
             color: #c4b5fd;
             background: rgba(124, 58, 237, 0.18);
@@ -1112,19 +1125,32 @@
 
         @media (max-width: 768px) {
             .mobile-bottom-dock { display: flex; }
-            .page-content { padding: 18px 16px 86px 16px; }
+            .page-content { padding: 16px 14px calc(78px + env(safe-area-inset-bottom, 0px)) 14px; }
 
             .top-header {
-                padding: 0 16px;
-                height: 60px;
+                padding: 0 14px;
+                height: 58px;
+                gap: 8px;
+            }
+
+            .header-greeting {
+                flex: 1 1 auto;
+                min-width: 0;
             }
 
             .header-greeting h1 {
-                font-size: 15px;
-                max-width: 180px;
+                font-size: 14.5px;
+                max-width: 100%;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+            }
+
+            .header-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-shrink: 0;
             }
 
             .header-date { display: none; }
@@ -1164,14 +1190,75 @@
                 grid-auto-columns: minmax(84vw, 1fr);
             }
 
-            .header-greeting h1 {
-                max-width: 140px;
-                font-size: 14px;
-            }
-
             .tab-btn {
                 padding: 6px 10px;
                 font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-content {
+                padding: 12px 10px calc(74px + env(safe-area-inset-bottom, 0px)) 10px;
+            }
+
+            .top-header {
+                padding: 0 10px;
+                height: 54px;
+                gap: 6px;
+            }
+
+            .mobile-menu-btn {
+                width: 34px;
+                height: 34px;
+            }
+
+            .header-greeting h1 {
+                font-size: 13.5px;
+            }
+
+            .header-actions {
+                gap: 6px;
+            }
+
+            #header-theme-toggle-btn {
+                width: 32px !important;
+                height: 32px !important;
+            }
+
+            .modal-box {
+                padding: 18px 14px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .top-header {
+                padding: 0 8px;
+                gap: 4px;
+            }
+
+            .mobile-menu-btn {
+                width: 32px;
+                height: 32px;
+            }
+
+            .header-greeting h1 {
+                font-size: 12.5px;
+            }
+
+            .header-actions {
+                gap: 4px;
+            }
+
+            .dock-item {
+                padding: 3px 1px;
+                font-size: 9.5px;
+            }
+            .dock-item span {
+                font-size: 9.5px;
+            }
+            .dock-item i {
+                width: 16px;
+                height: 16px;
             }
         }
 
@@ -1328,7 +1415,7 @@
         </div>
     </div>
 
-    <!-- ===== MOBILE BOTTOM NAVIGATION DOCK ===== -->
+    <!-- ===== MOBILE BOTTOM NAVIGATION DOCK (5 Core Apps) ===== -->
     <nav class="mobile-bottom-dock">
         <a href="{{ route('dashboard') }}" class="dock-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
             <i data-lucide="layout-dashboard"></i>
@@ -1349,10 +1436,6 @@
         <a href="{{ route('notes.index') }}" class="dock-item {{ request()->routeIs('notes.*') ? 'active' : '' }}">
             <i data-lucide="sticky-note"></i>
             <span>Notes</span>
-        </a>
-        <a href="{{ route('profile.edit') }}" class="dock-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-            <i data-lucide="user"></i>
-            <span>Profile</span>
         </a>
     </nav>
 </div>

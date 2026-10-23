@@ -4,17 +4,20 @@
 @section('page-title', 'Fitness Community 🏋️')
 
 @section('header-actions')
-    <button type="button" class="btn btn-primary" onclick="document.getElementById('create-post-modal').style.display='flex'">
-        <i data-lucide="plus" style="width:16px;height:16px;"></i>
-        Share Workout
+    <button type="button" class="btn btn-primary btn-share-workout"
+        onclick="document.getElementById('create-post-modal').style.display='flex'">
+        <i data-lucide="plus" style="width:15px;height:15px;flex-shrink:0;"></i>
+        <span class="btn-share-text-full">Share Workout</span>
+        <span class="btn-share-text-short">Share</span>
     </button>
 @endsection
 
 @section('content')
-    <div style="display:flex; flex-direction:column; gap:24px; max-width: 900px; margin: 0 auto;">
+    <div class="fitness-container"
+        style="display:flex; flex-direction:column; gap:20px; max-width:900px; width:100%; margin:0 auto; box-sizing:border-box; min-width:0;">
 
         <!-- Community Metric Cards -->
-        <div class="grid-3" style="gap:16px;">
+        <div class="grid-3 fitness-metrics-grid" style="gap:14px; width:100%; box-sizing:border-box;">
             <div class="glass-card stat-card animate-in">
                 <div class="stat-icon" style="background:rgba(124,58,237,0.18);">
                     <i data-lucide="activity" style="color:#a78bfa;width:24px;height:24px;"></i>
@@ -45,17 +48,20 @@
         </div>
 
         <!-- Filter & Category Bar -->
-        <div class="glass-card animate-in" style="padding:16px 20px;">
+        <div class="glass-card animate-in fitness-filter-card"
+            style="padding:14px 18px; width:100%; box-sizing:border-box;">
             <form method="GET" action="{{ route('fitness.index') }}"
-                style="display:flex; flex-direction:column; gap:14px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                style="display:flex; flex-direction:column; gap:12px; width:100%; box-sizing:border-box;">
+                <div
+                    style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; width:100%; box-sizing:border-box;">
                     <!-- Search Input -->
-                    <div class="input-icon-wrap" style="flex:1 1 240px; position:relative;">
+                    <div class="input-icon-wrap"
+                        style="flex:1 1 200px; min-width:0; position:relative; box-sizing:border-box;">
                         <i data-lucide="search"
-                            style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--text-muted); pointer-events:none;"></i>
+                            style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-muted); pointer-events:none;"></i>
                         <input type="text" name="search" class="form-control"
                             placeholder="Search workouts, captions, athletes..." value="{{ request('search') }}"
-                            style="padding-left:38px;">
+                            style="padding-left:36px; width:100%; box-sizing:border-box;">
                     </div>
 
                     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
@@ -131,8 +137,8 @@
                 <div style="display:flex; align-items:center; gap:10px;">
                     <i data-lucide="message-square" style="width:18px; height:18px; color:#f59e0b;"></i>
                     <span style="font-size:13px; color:var(--text-primary); font-weight:600;">Showing Hidden Comments</span>
-                    <span style="font-size:12px; color:var(--text-muted);">Previously hidden comments are displayed with an
-                        unhide option.</span>
+                    <span style="font-size:12px; color:var(--text-muted);">Previously hidden comments and replies are
+                        displayed with an unhide option.</span>
                 </div>
                 <a href="{{ route('fitness.index', request()->except('show_hidden_comments')) }}"
                     class="btn btn-ghost btn-sm" style="font-size:12px;">
@@ -148,31 +154,33 @@
         </div>
 
         <!-- Feed Stream -->
-        <div style="display:flex; flex-direction:column; gap:22px;">
+        <div class="fitness-feed-stream"
+            style="display:flex; flex-direction:column; gap:20px; width:100%; box-sizing:border-box;">
             @forelse($posts as $post)
-                <article class="glass-card animate-in" style="overflow:visible; border-radius:var(--radius-lg);"
+                <article class="glass-card animate-in post-card"
+                    style="width:100%; max-width:100%; box-sizing:border-box; overflow:visible; border-radius:var(--radius-lg); position:relative;"
                     id="post-{{ $post->id }}" x-data="postActions({{ $post->id }}, {{ $post->isSavedBy(Auth::user()) ? 'true' : 'false' }})">
                     <!-- Post Header -->
-                    <div
-                        style="padding:18px 20px 14px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border);">
-                        <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="post-header"
+                        style="padding:16px 18px 12px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); gap:10px; width:100%; box-sizing:border-box;">
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1 1 auto;">
                             <img src="{{ $post->user->avatar_url }}" alt="{{ $post->user->name }}"
-                                style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid var(--accent-purple); box-shadow:0 0 15px rgba(124,58,237,0.3);">
-                            <div>
-                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--accent-purple); box-shadow:0 0 12px rgba(124,58,237,0.3); flex-shrink:0;">
+                            <div style="min-width:0; flex:1 1 auto;">
+                                <div style="display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; min-width:0;">
                                     <span
-                                        style="font-weight:700; color:var(--text-primary); font-size:14px;">{{ $post->user->name }}</span>
-                                    <span style="font-size:12px; color:var(--text-muted);">@
-                                        {{ $post->user->username_display }}</span>
+                                        style="font-weight:700; color:var(--text-primary); font-size:13.5px; word-break:break-word;">{{ $post->user->name }}</span>
+                                    <span
+                                        style="font-size:11.5px; color:var(--text-muted); word-break:break-all;">{{ '@' . $post->user->username_display }}</span>
                                 </div>
-                                <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+                                <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
                                     {{ $post->created_at->diffForHumans() }}
                                 </div>
                             </div>
                         </div>
 
                         <!-- ===== Post Action Controls: Ellipsis Menu + X Button ===== -->
-                        <div style="display:flex; align-items:center; gap:6px;">
+                        <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
                             <!-- Three-Dot Ellipsis Menu -->
                             <div style="position:relative;" x-data="{ menuOpen: false }"
                                 @keydown.escape.window="menuOpen = false">
@@ -192,8 +200,8 @@
                                     x-transition:leave="transition ease-in duration-75"
                                     x-transition:leave-start="opacity-100 scale-100"
                                     x-transition:leave-end="opacity-0 scale-95" x-cloak role="menu"
-                                    aria-label="Post actions"
-                                    style="position:absolute; right:0; top:calc(100% + 6px); min-width:190px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:0 8px 30px rgba(0,0,0,0.4); z-index:100; padding:4px 0; backdrop-filter:blur(20px);">
+                                    aria-label="Post actions" class="post-dropdown-menu"
+                                    style="position:absolute; right:0; top:calc(100% + 6px); min-width:180px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:0 8px 30px rgba(0,0,0,0.4); z-index:100; padding:4px 0; backdrop-filter:blur(20px);">
 
                                     @if ($post->user_id === Auth::id())
                                         {{-- Author actions --}}
@@ -257,7 +265,6 @@
 
                             <!-- X Button: Hide Post -->
                             @if ($showHidden)
-                                {{-- In hidden-posts view, X acts as unhide --}}
                                 <form action="{{ route('fitness.unhide', $post) }}" method="POST" style="margin:0;">
                                     @csrf
                                     @method('DELETE')
@@ -279,240 +286,611 @@
                     </div>
 
                     <!-- Workout Category + Performance Metrics Bar -->
-                    <div
-                        style="display:flex; gap:14px; padding:10px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); font-size:12px; color:var(--text-secondary); flex-wrap:wrap; align-items:center;">
-                        <!-- Category Chip -->
+                    <div class="post-metrics-bar"
+                        style="display:flex; gap:8px 12px; padding:8px 18px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); font-size:11.5px; color:var(--text-secondary); flex-wrap:wrap; align-items:center; width:100%; box-sizing:border-box;">
                         <span class="badge"
-                            style="background:rgba(124,58,237,0.15); color:{{ $post->workout_badge_color }}; border:1px solid {{ $post->workout_badge_color }}40; font-size:11px;">
+                            style="background:rgba(124,58,237,0.15); color:{{ $post->workout_badge_color }}; border:1px solid {{ $post->workout_badge_color }}40; font-size:10.5px; flex-shrink:0;">
                             {{ ucfirst($post->workout_type) }}
                         </span>
 
                         @if ($post->duration_minutes)
-                            <div style="display:inline-flex; align-items:center; gap:6px;">
-                                <i data-lucide="clock" style="width:14px; height:14px; color:#60a5fa;"></i>
-                                <span>Duration: <strong>{{ $post->duration_minutes }} mins</strong></span>
+                            <div style="display:inline-flex; align-items:center; gap:5px; flex-shrink:0;">
+                                <i data-lucide="clock" style="width:13px; height:13px; color:#60a5fa;"></i>
+                                <span>Duration: <strong>{{ $post->duration_minutes }}m</strong></span>
                             </div>
                         @endif
                         @if ($post->calories_burned)
-                            <div style="display:inline-flex; align-items:center; gap:6px;">
-                                <i data-lucide="flame" style="width:14px; height:14px; color:#f59e0b;"></i>
+                            <div style="display:inline-flex; align-items:center; gap:5px; flex-shrink:0;">
+                                <i data-lucide="flame" style="width:13px; height:13px; color:#f59e0b;"></i>
                                 <span>Burned: <strong>{{ number_format($post->calories_burned) }} kcal</strong></span>
                             </div>
                         @endif
                     </div>
 
                     <!-- Post Body / Caption -->
-                    <div
-                        style="padding:18px 20px 14px 20px; font-size:14px; color:var(--text-primary); line-height:1.65; white-space:pre-wrap;">
+                    <div class="post-caption"
+                        style="padding:14px 18px 12px 18px; font-size:13.5px; color:var(--text-primary); line-height:1.6; white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere; width:100%; box-sizing:border-box;">
                         {{ $post->caption }}</div>
 
                     <!-- Post Photo (if present) -->
                     @if ($post->image_path)
-                        <div style="padding:0 20px 18px 20px;">
+                        <div class="post-image-wrap" style="padding:0 18px 14px 18px; width:100%; box-sizing:border-box;">
                             <div
-                                style="border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); max-height:480px; background:#000; display:flex; align-items:center; justify-content:center;">
+                                style="border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--border); max-height:480px; background:#000; display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box;">
                                 <img src="{{ $post->image_url }}" alt="Workout Photo"
-                                    style="width:100%; height:auto; max-height:480px; object-fit:contain; display:block;"
+                                    style="width:100%; max-width:100%; height:auto; max-height:480px; object-fit:contain; display:block;"
                                     loading="lazy">
                             </div>
                         </div>
                     @endif
 
-                    <!-- Interaction Actions (Like & Comments Count) -->
-                    <div style="padding:12px 20px; border-top:1px solid var(--border); background:rgba(255,255,255,0.015); display:flex; align-items:center; justify-content:space-between;"
+                    <!-- Interaction Actions (Like & Comments Count) and Comments Section -->
+                    <div class="post-interactions-wrap"
+                        style="border-top:1px solid var(--border); background:rgba(255,255,255,0.015); width:100%; box-sizing:border-box;"
                         x-data="{ commentsOpen: false }">
-                        <div style="display:flex; align-items:center; gap:16px;">
-                            <!-- Like Form Button -->
-                            <form action="{{ route('fitness.like', $post) }}" method="POST" style="margin:0;">
-                                @csrf
-                                @php $liked = $post->isLikedBy(Auth::user()); @endphp
-                                <button type="submit" class="btn-icon"
-                                    style="padding:6px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; border-color:{{ $liked ? 'rgba(236,72,153,0.5)' : 'var(--border)' }}; color:{{ $liked ? '#ec4899' : 'var(--text-secondary)' }}; background:{{ $liked ? 'rgba(236,72,153,0.1)' : 'transparent' }};">
-                                    <i data-lucide="heart"
-                                        style="width:15px; height:15px; fill:{{ $liked ? '#ec4899' : 'none' }}; stroke:{{ $liked ? '#ec4899' : 'currentColor' }};"></i>
-                                    <span>{{ $post->likes->count() }}</span>
+                        <!-- Actions Bar -->
+                        <div class="post-actions-bar"
+                            style="padding:10px 18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; width:100%; box-sizing:border-box;">
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0;">
+                                <!-- Like Form Button -->
+                                <form action="{{ route('fitness.like', $post) }}" method="POST" style="margin:0;">
+                                    @csrf
+                                    @php $liked = $post->isLikedBy(Auth::user()); @endphp
+                                    <button type="submit" class="btn-icon"
+                                        style="padding:6px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; font-size:12px; border-color:{{ $liked ? 'rgba(236,72,153,0.5)' : 'var(--border)' }}; color:{{ $liked ? '#ec4899' : 'var(--text-secondary)' }}; background:{{ $liked ? 'rgba(236,72,153,0.1)' : 'transparent' }};">
+                                        <i data-lucide="heart"
+                                            style="width:14px; height:14px; fill:{{ $liked ? '#ec4899' : 'none' }}; stroke:{{ $liked ? '#ec4899' : 'currentColor' }};"></i>
+                                        <span>{{ $post->likes->count() }}</span>
+                                    </button>
+                                </form>
+
+                                <!-- Toggle Comments Button -->
+                                @php
+                                    $totalCommentsCount =
+                                        $post->comments_count ??
+                                        $post->comments->sum(fn($c) => 1 + ($c->replies ? $c->replies->count() : 0));
+                                @endphp
+                                <button type="button"
+                                    @click="commentsOpen = !commentsOpen; if(commentsOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
+                                    class="btn-icon"
+                                    style="padding:6px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; font-size:12px;">
+                                    <i data-lucide="message-circle" style="width:14px; height:14px;"></i>
+                                    <span id="comments-count-{{ $post->id }}">{{ $totalCommentsCount }}
+                                        {{ Str::plural('Comment', $totalCommentsCount) }}</span>
                                 </button>
-                            </form>
 
-                            <!-- Toggle Comments Button -->
-                            <button type="button"
-                                @click="commentsOpen = !commentsOpen; if(commentsOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
-                                class="btn-icon"
-                                style="padding:6px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; font-size:12.5px;">
-                                <i data-lucide="message-circle" style="width:15px; height:15px;"></i>
-                                <span id="comments-count-{{ $post->id }}">{{ $post->comments->count() }}
-                                    {{ Str::plural('Comment', $post->comments->count()) }}</span>
-                            </button>
-
-                            <!-- Saved indicator -->
-                            <span x-show="isSaved" x-cloak
-                                style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:#a78bfa;">
-                                <i data-lucide="bookmark" style="width:12px; height:12px; fill:#a78bfa;"></i>
-                                Saved
-                            </span>
+                                <!-- Saved indicator -->
+                                <span x-show="isSaved" x-cloak
+                                    style="display:inline-flex; align-items:center; gap:4px; font-size:11px; color:#a78bfa;">
+                                    <i data-lucide="bookmark" style="width:12px; height:12px; fill:#a78bfa;"></i>
+                                    Saved
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Comments Thread (Collapsible via Alpine) -->
-                        <div x-show="commentsOpen" x-cloak
-                            style="width:100%; margin-top:14px; border-top:1px solid var(--border); padding-top:14px; overflow:visible;">
-                            <!-- Existing Comments List -->
+                        <div x-show="commentsOpen" x-cloak class="post-comments-thread"
+                            style="width:100%; max-width:100%; box-sizing:border-box; border-top:1px solid var(--border); padding:14px 18px;">
+                            <!-- Top-Level Comments List -->
                             <div
-                                style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px; overflow:visible;">
+                                style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px; overflow:visible;">
                                 @forelse($post->comments as $comment)
                                     @php
                                         $isCommentAuthor = $comment->user_id === Auth::id();
                                         $isPostOwner = $post->user_id === Auth::id();
                                         $isCommentHidden = $comment->isHiddenBy(Auth::user());
+                                        $userReaction = $comment->userReaction(Auth::user());
+                                        $reactionCounts = $comment->reactionCounts();
+                                        $totalReactions = $comment->totalReactions();
                                     @endphp
                                     <div class="comment-item-card" id="comment-{{ $comment->id }}"
-                                        x-data="commentActions({{ $comment->id }}, {{ $post->id }}, {{ json_encode($comment->comment) }}, {{ $comment->isEdited() ? 'true' : 'false' }}, {{ $isCommentHidden ? 'true' : 'false' }})"
-                                        style="display:flex; gap:10px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius-sm); position:relative; overflow:visible;">
-                                        <img src="{{ $comment->user->avatar_url }}" alt="{{ $comment->user->name }}"
-                                            style="width:28px; height:28px; border-radius:50%; object-fit:cover; flex-shrink:0;">
-                                        <div style="flex:1; min-width:0; position:relative; overflow:visible;">
-                                            <!-- Comment Header -->
-                                            <div
-                                                style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                                    <span
-                                                        style="font-size:12px; font-weight:700; color:var(--text-primary);">{{ $comment->user->name }}</span>
-                                                    <span
-                                                        style="font-size:10.5px; font-weight:400; color:var(--text-muted);">
-                                                        {{ $comment->created_at->diffForHumans() }}
-                                                    </span>
-                                                    <!-- Edited indicator -->
-                                                    <span x-show="isEdited" x-cloak
-                                                        style="font-size:10px; color:var(--text-muted); font-style:italic;"
-                                                        title="Comment was edited">(edited)</span>
-                                                    @if ($comment->isEdited())
-                                                        <span x-show="!isEdited"
-                                                            style="font-size:10px; color:var(--text-muted); font-style:italic;">(edited)</span>
-                                                    @endif
-                                                    <!-- Hidden badge -->
-                                                    <span x-show="isHidden" class="badge"
-                                                        style="background:rgba(245,158,11,0.15); color:#f59e0b; font-size:10px; border:1px solid rgba(245,158,11,0.3); padding:1px 6px;">
-                                                        Hidden by you
-                                                    </span>
-                                                </div>
+                                        x-data="commentActions({{ $comment->id }}, {{ $post->id }}, {{ json_encode($comment->comment) }}, {{ $comment->isEdited() ? 'true' : 'false' }}, {{ $isCommentHidden ? 'true' : 'false' }}, {{ json_encode($userReaction) }}, {{ json_encode($reactionCounts) }}, {{ $totalReactions }}, {{ json_encode($comment->user->name) }})"
+                                        style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius-sm); position:relative; overflow:visible; width:100%; max-width:100%; box-sizing:border-box; min-width:0;">
 
-                                                <!-- Comment Controls (Three-dot & X) -->
-                                                <div style="display:flex; align-items:center; gap:4px; position:relative;">
-                                                    <!-- Three-Dot Menu -->
-                                                    <div style="position:relative;"
-                                                        @keydown.escape.window="menuOpen = false">
+                                        <div
+                                            style="display:flex; gap:8px; align-items:flex-start; position:relative; overflow:visible; width:100%; box-sizing:border-box; min-width:0;">
+                                            <img src="{{ $comment->user->avatar_url }}" alt="{{ $comment->user->name }}"
+                                                style="width:28px; height:28px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:2px;">
+
+                                            <div
+                                                style="flex:1 1 0; min-width:0; position:relative; overflow:visible; width:100%; box-sizing:border-box;">
+                                                <!-- Comment Header -->
+                                                <div
+                                                    style="display:flex; align-items:flex-start; justify-content:space-between; gap:6px; width:100%;">
+                                                    <div
+                                                        style="display:flex; align-items:baseline; gap:5px; flex-wrap:wrap; min-width:0; flex:1 1 auto;">
+                                                        <span
+                                                            style="font-size:12px; font-weight:700; color:var(--text-primary); word-break:break-word;">{{ $comment->user->name }}</span>
+                                                        <span
+                                                            style="font-size:10.5px; font-weight:400; color:var(--text-muted); flex-shrink:0;">
+                                                            {{ $comment->created_at->diffForHumans() }}
+                                                        </span>
+                                                        <!-- Edited indicator -->
+                                                        <span x-show="isEdited" x-cloak
+                                                            style="font-size:10px; color:var(--text-muted); font-style:italic;"
+                                                            title="Comment was edited">(edited)</span>
+                                                        @if ($comment->isEdited())
+                                                            <span x-show="!isEdited"
+                                                                style="font-size:10px; color:var(--text-muted); font-style:italic;">(edited)</span>
+                                                        @endif
+                                                        <!-- Hidden badge -->
+                                                        <span x-show="isHidden" class="badge"
+                                                            style="background:rgba(245,158,11,0.15); color:#f59e0b; font-size:10px; border:1px solid rgba(245,158,11,0.3); padding:1px 6px;">
+                                                            Hidden by you
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Comment Controls (Three-dot & X) -->
+                                                    <div
+                                                        style="display:flex; align-items:center; gap:4px; position:relative; flex-shrink:0;">
+                                                        <!-- Three-Dot Menu -->
+                                                        <div style="position:relative;"
+                                                            @keydown.escape.window="menuOpen = false">
+                                                            <button type="button" class="btn-icon"
+                                                                style="width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border); transition:all 0.15s ease;"
+                                                                @click="menuOpen = !menuOpen; if(menuOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
+                                                                @click.outside="menuOpen = false"
+                                                                :aria-expanded="menuOpen.toString()" aria-haspopup="true"
+                                                                aria-label="Comment actions" title="Comment actions">
+                                                                <i data-lucide="more-vertical"
+                                                                    style="width:13px; height:13px; color:var(--text-secondary);"></i>
+                                                            </button>
+
+                                                            <!-- Dropdown Menu -->
+                                                            <div x-show="menuOpen"
+                                                                x-transition:enter="transition ease-out duration-100"
+                                                                x-transition:enter-start="opacity-0 scale-95"
+                                                                x-transition:enter-end="opacity-100 scale-100"
+                                                                x-transition:leave="transition ease-in duration-75"
+                                                                x-transition:leave-start="opacity-100 scale-100"
+                                                                x-transition:leave-end="opacity-0 scale-95" x-cloak
+                                                                role="menu" aria-label="Comment action menu"
+                                                                style="position:absolute; right:0; top:calc(100% + 4px); min-width:160px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:0 8px 30px rgba(0,0,0,0.4); z-index:100; padding:4px 0; backdrop-filter:blur(20px);">
+
+                                                                @if ($isCommentAuthor)
+                                                                    <button type="button" role="menuitem"
+                                                                        class="comment-menu-item" @click="startEdit()">
+                                                                        <i data-lucide="pencil"
+                                                                            style="width:13px; height:13px;"></i>
+                                                                        Edit comment
+                                                                    </button>
+                                                                @endif
+
+                                                                <button type="button" role="menuitem"
+                                                                    class="comment-menu-item"
+                                                                    @click="copyComment(); menuOpen = false">
+                                                                    <i data-lucide="copy"
+                                                                        style="width:13px; height:13px;"></i>
+                                                                    Copy comment
+                                                                </button>
+
+                                                                <button type="button" role="menuitem"
+                                                                    class="comment-menu-item"
+                                                                    @click="isHidden ? unhideComment() : hideComment(); menuOpen = false">
+                                                                    <i :data-lucide="isHidden ? 'eye' : 'eye-off'"
+                                                                        style="width:13px; height:13px;"></i>
+                                                                    <span
+                                                                        x-text="isHidden ? 'Unhide comment' : 'Hide comment'"></span>
+                                                                </button>
+
+                                                                <button type="button" role="menuitem"
+                                                                    class="comment-menu-item" style="color:#f59e0b;"
+                                                                    @click="menuOpen = false; $dispatch('open-report-modal', { targetId: {{ $comment->id }}, type: 'comment' })">
+                                                                    <i data-lucide="flag"
+                                                                        style="width:13px; height:13px;"></i>
+                                                                    Report comment
+                                                                </button>
+
+                                                                @if ($isCommentAuthor || $isPostOwner)
+                                                                    <div
+                                                                        style="border-top:1px solid var(--border); margin:4px 0;">
+                                                                    </div>
+                                                                    <button type="button" role="menuitem"
+                                                                        class="comment-menu-item" style="color:#f87171;"
+                                                                        @click="deleteComment(); menuOpen = false">
+                                                                        <i data-lucide="trash-2"
+                                                                            style="width:13px; height:13px;"></i>
+                                                                        Delete comment
+                                                                    </button>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- X Button (Hide or Unhide) -->
                                                         <button type="button" class="btn-icon"
                                                             style="width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border); transition:all 0.15s ease;"
-                                                            @click="menuOpen = !menuOpen; if(menuOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
-                                                            @click.outside="menuOpen = false"
-                                                            :aria-expanded="menuOpen.toString()" aria-haspopup="true"
-                                                            aria-label="Comment actions" title="Comment actions">
-                                                            <i data-lucide="more-vertical"
+                                                            @click="isHidden ? unhideComment() : hideComment()"
+                                                            :title="isHidden ? 'Unhide comment' : 'Hide comment from your view'"
+                                                            :aria-label="isHidden ? 'Unhide comment' : 'Hide comment'">
+                                                            <i :data-lucide="isHidden ? 'eye' : 'x'"
                                                                 style="width:13px; height:13px; color:var(--text-secondary);"></i>
                                                         </button>
+                                                    </div>
+                                                </div>
 
-                                                        <!-- Dropdown Menu -->
-                                                        <div x-show="menuOpen"
-                                                            x-transition:enter="transition ease-out duration-100"
-                                                            x-transition:enter-start="opacity-0 scale-95"
-                                                            x-transition:enter-end="opacity-100 scale-100"
-                                                            x-transition:leave="transition ease-in duration-75"
-                                                            x-transition:leave-start="opacity-100 scale-100"
-                                                            x-transition:leave-end="opacity-0 scale-95" x-cloak
-                                                            role="menu" aria-label="Comment action menu"
-                                                            style="position:absolute; right:0; top:calc(100% + 4px); min-width:160px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:0 8px 30px rgba(0,0,0,0.4); z-index:100; padding:4px 0; backdrop-filter:blur(20px);">
+                                                <!-- Display Comment Text -->
+                                                <div x-show="!editing"
+                                                    style="font-size:12.5px; color:var(--text-secondary); margin-top:3px; word-break:break-word;">
+                                                    <span x-text="commentText">{{ $comment->comment }}</span>
+                                                </div>
 
-                                                            @if ($isCommentAuthor)
-                                                                {{-- Edit comment --}}
-                                                                <button type="button" role="menuitem"
-                                                                    class="comment-menu-item" @click="startEdit()">
-                                                                    <i data-lucide="pencil"
-                                                                        style="width:13px; height:13px;"></i>
-                                                                    Edit comment
-                                                                </button>
-                                                            @endif
-
-                                                            {{-- Copy comment --}}
-                                                            <button type="button" role="menuitem"
-                                                                class="comment-menu-item"
-                                                                @click="copyComment(); menuOpen = false">
-                                                                <i data-lucide="copy"
-                                                                    style="width:13px; height:13px;"></i>
-                                                                Copy comment
+                                                <!-- Inline Comment Editor -->
+                                                <div x-show="editing" x-cloak style="margin-top:6px;">
+                                                    <form @submit.prevent="saveEdit()">
+                                                        <textarea x-model="editText" class="form-control" rows="2" maxlength="1000" required
+                                                            placeholder="Edit your comment..."
+                                                            style="font-size:12.5px; padding:8px 10px; width:100%; border-radius:var(--radius-sm);"></textarea>
+                                                        <div
+                                                            style="display:flex; justify-content:flex-end; gap:6px; margin-top:6px;">
+                                                            <button type="button" class="btn btn-ghost btn-sm"
+                                                                @click="cancelEdit()"
+                                                                style="padding:4px 10px; font-size:11.5px;">Cancel</button>
+                                                            <button type="submit" class="btn btn-primary btn-sm"
+                                                                :disabled="isSaving || !editText.trim()"
+                                                                style="padding:4px 10px; font-size:11.5px;">
+                                                                <span x-text="isSaving ? 'Saving...' : 'Save'"></span>
                                                             </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
 
-                                                            {{-- Hide / Unhide comment --}}
-                                                            <button type="button" role="menuitem"
-                                                                class="comment-menu-item"
-                                                                @click="isHidden ? unhideComment() : hideComment(); menuOpen = false">
-                                                                <i :data-lucide="isHidden ? 'eye' : 'eye-off'"
-                                                                    style="width:13px; height:13px;"></i>
-                                                                <span
-                                                                    x-text="isHidden ? 'Unhide comment' : 'Hide comment'"></span>
-                                                            </button>
+                                                <!-- Comment Action Footer: Reactions & Reply -->
+                                                <div
+                                                    style="display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap; position:relative;">
+                                                    <!-- Reaction Picker Popover -->
+                                                    <div style="position:relative;" @click.outside="pickerOpen = false"
+                                                        @keydown.escape.window="pickerOpen = false">
+                                                        <button type="button" class="comment-action-pill"
+                                                            :class="{ 'active': userReaction }"
+                                                            @click="pickerOpen = !pickerOpen"
+                                                            title="React to this comment"
+                                                            aria-label="React to this comment">
+                                                            <span x-text="reactionEmoji(userReaction) || '👍'"
+                                                                style="font-size:12px;"></span>
+                                                            <span
+                                                                x-text="userReaction ? capitalize(userReaction) : 'React'"
+                                                                style="font-size:11px; font-weight:600;"></span>
+                                                        </button>
 
-                                                            {{-- Report comment --}}
-                                                            <button type="button" role="menuitem"
-                                                                class="comment-menu-item" style="color:#f59e0b;"
-                                                                @click="menuOpen = false; $dispatch('open-report-modal', { targetId: {{ $comment->id }}, type: 'comment' })">
-                                                                <i data-lucide="flag"
-                                                                    style="width:13px; height:13px;"></i>
-                                                                Report comment
-                                                            </button>
-
-                                                            @if ($isCommentAuthor || $isPostOwner)
-                                                                <div
-                                                                    style="border-top:1px solid var(--border); margin:4px 0;">
-                                                                </div>
-                                                                {{-- Delete comment --}}
-                                                                <button type="button" role="menuitem"
-                                                                    class="comment-menu-item" style="color:#f87171;"
-                                                                    @click="deleteComment(); menuOpen = false">
-                                                                    <i data-lucide="trash-2"
-                                                                        style="width:13px; height:13px;"></i>
-                                                                    Delete comment
-                                                                </button>
-                                                            @endif
+                                                        <!-- Popover -->
+                                                        <div x-show="pickerOpen"
+                                                            x-transition:enter="transition ease-out duration-150"
+                                                            x-transition:enter-start="opacity-0 translate-y-1 scale-90"
+                                                            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                                            x-transition:leave="transition ease-in duration-100"
+                                                            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                                            x-transition:leave-end="opacity-0 translate-y-1 scale-90"
+                                                            x-cloak class="reaction-popover"
+                                                            style="position:absolute; bottom:calc(100% + 4px); left:0; background:var(--bg-card); border:1px solid var(--border); border-radius:24px; box-shadow:0 8px 30px rgba(0,0,0,0.5); backdrop-filter:blur(24px); z-index:120; display:flex; gap:4px; padding:3px 6px;">
+                                                            <button type="button" @click="toggleReaction('like')"
+                                                                class="reaction-emoji-btn"
+                                                                :class="{ 'selected': userReaction === 'like' }"
+                                                                title="Like (👍)">👍</button>
+                                                            <button type="button" @click="toggleReaction('love')"
+                                                                class="reaction-emoji-btn"
+                                                                :class="{ 'selected': userReaction === 'love' }"
+                                                                title="Love (❤️)">❤️</button>
+                                                            <button type="button" @click="toggleReaction('celebrate')"
+                                                                class="reaction-emoji-btn"
+                                                                :class="{ 'selected': userReaction === 'celebrate' }"
+                                                                title="Celebrate (🎉)">🎉</button>
+                                                            <button type="button" @click="toggleReaction('laugh')"
+                                                                class="reaction-emoji-btn"
+                                                                :class="{ 'selected': userReaction === 'laugh' }"
+                                                                title="Laugh (😂)">😂</button>
+                                                            <button type="button" @click="toggleReaction('fire')"
+                                                                class="reaction-emoji-btn"
+                                                                :class="{ 'selected': userReaction === 'fire' }"
+                                                                title="Fire (🔥)">🔥</button>
                                                         </div>
                                                     </div>
 
-                                                    <!-- X Button (Hide or Unhide) -->
-                                                    <button type="button" class="btn-icon"
-                                                        style="width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border); transition:all 0.15s ease;"
-                                                        @click="isHidden ? unhideComment() : hideComment()"
-                                                        :title="isHidden ? 'Unhide comment' : 'Hide comment from your view'"
-                                                        :aria-label="isHidden ? 'Unhide comment' : 'Hide comment'">
-                                                        <i :data-lucide="isHidden ? 'eye' : 'x'"
-                                                            style="width:13px; height:13px; color:var(--text-secondary);"></i>
+                                                    <!-- Reaction badges summary -->
+                                                    <div
+                                                        style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
+                                                        <template x-for="(count, type) in reactionCounts"
+                                                            :key="type">
+                                                            <button type="button" x-show="count > 0"
+                                                                @click="toggleReaction(type)" class="reaction-badge-pill"
+                                                                :class="{ 'user-reacted': userReaction === type }"
+                                                                :title="capitalize(type) + ' (' + count + ')'">
+                                                                <span x-text="reactionEmoji(type)"></span>
+                                                                <span x-text="count"
+                                                                    style="font-size:11px; font-weight:600;"></span>
+                                                            </button>
+                                                        </template>
+                                                    </div>
+
+                                                    <!-- Reply Button -->
+                                                    <button type="button" class="comment-action-pill"
+                                                        @click="openReply()" title="Reply to this comment"
+                                                        aria-label="Reply to this comment">
+                                                        <i data-lucide="reply" style="width:12px; height:12px;"></i>
+                                                        <span style="font-size:11px; font-weight:600;">Reply</span>
                                                     </button>
                                                 </div>
                                             </div>
-
-                                            <!-- Display Comment Text -->
-                                            <div x-show="!editing"
-                                                style="font-size:12.5px; color:var(--text-secondary); margin-top:3px; word-break:break-word;">
-                                                <span x-text="commentText">{{ $comment->comment }}</span>
-                                            </div>
-
-                                            <!-- Inline Comment Editor -->
-                                            <div x-show="editing" x-cloak style="margin-top:6px;">
-                                                <form @submit.prevent="saveEdit()">
-                                                    <textarea x-model="editText" class="form-control" rows="2" maxlength="1000" required
-                                                        placeholder="Edit your comment..."
-                                                        style="font-size:12.5px; padding:8px 10px; width:100%; border-radius:var(--radius-sm);"></textarea>
-                                                    <div
-                                                        style="display:flex; justify-content:flex-end; gap:6px; margin-top:6px;">
-                                                        <button type="button" class="btn btn-ghost btn-sm"
-                                                            @click="cancelEdit()"
-                                                            style="padding:4px 10px; font-size:11.5px;">Cancel</button>
-                                                        <button type="submit" class="btn btn-primary btn-sm"
-                                                            :disabled="isSaving || !editText.trim()"
-                                                            style="padding:4px 10px; font-size:11.5px;">
-                                                            <span x-text="isSaving ? 'Saving...' : 'Save'"></span>
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
                                         </div>
+
+                                        <!-- Inline Reply Composer -->
+                                        <div x-show="replying" x-cloak
+                                            style="margin-top:6px; padding:10px 12px; background:rgba(124,58,237,0.06); border:1px solid rgba(124,58,237,0.25); border-radius:var(--radius-sm);">
+                                            <div
+                                                style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                                                <span
+                                                    style="font-size:11px; color:#a78bfa; font-weight:600; display:flex; align-items:center; gap:4px;">
+                                                    <i data-lucide="corner-down-right"
+                                                        style="width:12px; height:12px;"></i>
+                                                    Replying to <span x-text="replyingToName"></span>
+                                                </span>
+                                                <button type="button" @click="cancelReply()"
+                                                    style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:11px;">Cancel</button>
+                                            </div>
+                                            <form action="{{ route('fitness.comment.reply', $comment) }}" method="POST"
+                                                @submit="isSubmittingReply = true">
+                                                @csrf
+                                                <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                                                <textarea name="comment" x-model="replyText" class="form-control" rows="2" maxlength="1000" required
+                                                    placeholder="Write your reply..."
+                                                    style="font-size:12px; padding:8px 10px; width:100%; border-radius:var(--radius-sm);"></textarea>
+                                                <div
+                                                    style="display:flex; justify-content:flex-end; gap:6px; margin-top:6px;">
+                                                    <button type="button" class="btn btn-ghost btn-sm"
+                                                        @click="cancelReply()"
+                                                        style="padding:3px 10px; font-size:11.5px;">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary btn-sm"
+                                                        :disabled="isSubmittingReply || !replyText.trim()"
+                                                        style="padding:3px 12px; font-size:11.5px;">
+                                                        <i data-lucide="send" style="width:11px; height:11px;"></i>
+                                                        <span x-text="isSubmittingReply ? 'Posting...' : 'Reply'"></span>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <!-- Replies List (Threaded with Indentation & Connector) -->
+                                        @if ($comment->replies && $comment->replies->count() > 0)
+                                            <div style="margin-top:4px;">
+                                                <button type="button"
+                                                    @click="repliesOpen = !repliesOpen; if(repliesOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
+                                                    class="btn-link"
+                                                    style="font-size:11.5px; color:#a78bfa; display:inline-flex; align-items:center; gap:4px; margin-bottom:6px; cursor:pointer; background:none; border:none; padding:2px 0;">
+                                                    <i :data-lucide="repliesOpen ? 'chevron-up' : 'chevron-down'"
+                                                        style="width:12px; height:12px;"></i>
+                                                    <span
+                                                        x-text="repliesOpen ? 'Hide replies ({{ $comment->replies->count() }})' : 'Show {{ $comment->replies->count() }} {{ Str::plural('reply', $comment->replies->count()) }}'"></span>
+                                                </button>
+
+                                                <div x-show="repliesOpen" x-cloak class="replies-thread-container">
+                                                    @foreach ($comment->replies as $reply)
+                                                        @php
+                                                            $isReplyAuthor = $reply->user_id === Auth::id();
+                                                            $isReplyHidden = $reply->isHiddenBy(Auth::user());
+                                                            $replyUserReaction = $reply->userReaction(Auth::user());
+                                                            $replyReactionCounts = $reply->reactionCounts();
+                                                            $replyTotalReactions = $reply->totalReactions();
+                                                        @endphp
+                                                        <div class="comment-item-card reply-item-card"
+                                                            id="comment-{{ $reply->id }}" x-data="commentActions({{ $reply->id }}, {{ $post->id }}, {{ json_encode($reply->comment) }}, {{ $reply->isEdited() ? 'true' : 'false' }}, {{ $isReplyHidden ? 'true' : 'false' }}, {{ json_encode($replyUserReaction) }}, {{ json_encode($replyReactionCounts) }}, {{ $replyTotalReactions }}, {{ json_encode($reply->user->name) }})"
+                                                            style="display:flex; flex-direction:column; gap:5px; padding:8px 10px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--radius-sm); position:relative; overflow:visible; width:100%; max-width:100%; box-sizing:border-box; min-width:0;">
+
+                                                            <div
+                                                                style="display:flex; gap:6px; align-items:flex-start; position:relative; overflow:visible; width:100%; box-sizing:border-box; min-width:0;">
+                                                                <img src="{{ $reply->user->avatar_url }}"
+                                                                    alt="{{ $reply->user->name }}"
+                                                                    style="width:22px; height:22px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:2px;">
+
+                                                                <div
+                                                                    style="flex:1 1 0; min-width:0; position:relative; overflow:visible; width:100%; box-sizing:border-box;">
+                                                                    <!-- Reply Header -->
+                                                                    <div
+                                                                        style="display:flex; align-items:flex-start; justify-content:space-between; gap:4px; width:100%;">
+                                                                        <div
+                                                                            style="display:flex; align-items:baseline; gap:4px; flex-wrap:wrap; min-width:0; flex:1 1 auto;">
+                                                                            <span
+                                                                                style="font-size:11.5px; font-weight:700; color:var(--text-primary); word-break:break-word;">{{ $reply->user->name }}</span>
+                                                                            <span
+                                                                                style="font-size:10px; color:var(--text-muted); flex-shrink:0;">{{ $reply->created_at->diffForHumans() }}</span>
+                                                                            <span x-show="isEdited" x-cloak
+                                                                                style="font-size:9.5px; color:var(--text-muted); font-style:italic;">(edited)</span>
+                                                                            @if ($reply->isEdited())
+                                                                                <span x-show="!isEdited"
+                                                                                    style="font-size:9.5px; color:var(--text-muted); font-style:italic;">(edited)</span>
+                                                                            @endif
+                                                                            <span x-show="isHidden" class="badge"
+                                                                                style="background:rgba(245,158,11,0.15); color:#f59e0b; font-size:9.5px; padding:1px 5px;">Hidden</span>
+                                                                        </div>
+
+                                                                        <!-- Controls -->
+                                                                        <div
+                                                                            style="display:flex; align-items:center; gap:2px; flex-shrink:0; position:relative;">
+                                                                            <!-- Three-dot -->
+                                                                            <div style="position:relative;"
+                                                                                @keydown.escape.window="menuOpen = false">
+                                                                                <button type="button" class="btn-icon"
+                                                                                    style="width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border);"
+                                                                                    @click="menuOpen = !menuOpen; if(menuOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
+                                                                                    @click.outside="menuOpen = false"
+                                                                                    title="Reply actions">
+                                                                                    <i data-lucide="more-vertical"
+                                                                                        style="width:12px; height:12px; color:var(--text-secondary);"></i>
+                                                                                </button>
+                                                                                <div x-show="menuOpen" x-cloak
+                                                                                    class="comment-dropdown-menu"
+                                                                                    style="position:absolute; right:0; top:calc(100% + 4px); min-width:150px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:0 8px 30px rgba(0,0,0,0.4); z-index:110; padding:4px 0; backdrop-filter:blur(20px);">
+                                                                                    @if ($isReplyAuthor)
+                                                                                        <button type="button"
+                                                                                            class="comment-menu-item"
+                                                                                            @click="startEdit()">
+                                                                                            <i data-lucide="pencil"
+                                                                                                style="width:12px; height:12px;"></i>
+                                                                                            Edit reply
+                                                                                        </button>
+                                                                                    @endif
+                                                                                    <button type="button"
+                                                                                        class="comment-menu-item"
+                                                                                        @click="copyComment(); menuOpen = false">
+                                                                                        <i data-lucide="copy"
+                                                                                            style="width:12px; height:12px;"></i>
+                                                                                        Copy reply
+                                                                                    </button>
+                                                                                    <button type="button"
+                                                                                        class="comment-menu-item"
+                                                                                        @click="isHidden ? unhideComment() : hideComment(); menuOpen = false">
+                                                                                        <i :data-lucide="isHidden ? 'eye' : 'eye-off'"
+                                                                                            style="width:12px; height:12px;"></i>
+                                                                                        <span
+                                                                                            x-text="isHidden ? 'Unhide reply' : 'Hide reply'"></span>
+                                                                                    </button>
+                                                                                    <button type="button"
+                                                                                        class="comment-menu-item"
+                                                                                        style="color:#f59e0b;"
+                                                                                        @click="menuOpen = false; $dispatch('open-report-modal', { targetId: {{ $reply->id }}, type: 'comment' })">
+                                                                                        <i data-lucide="flag"
+                                                                                            style="width:12px; height:12px;"></i>
+                                                                                        Report reply
+                                                                                    </button>
+                                                                                    @if ($isReplyAuthor || $isPostOwner)
+                                                                                        <div
+                                                                                            style="border-top:1px solid var(--border); margin:4px 0;">
+                                                                                        </div>
+                                                                                        <button type="button"
+                                                                                            class="comment-menu-item"
+                                                                                            style="color:#f87171;"
+                                                                                            @click="deleteComment(); menuOpen = false">
+                                                                                            <i data-lucide="trash-2"
+                                                                                                style="width:12px; height:12px;"></i>
+                                                                                            Delete reply
+                                                                                        </button>
+                                                                                    @endif
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <!-- X Button -->
+                                                                            <button type="button" class="btn-icon"
+                                                                                style="width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border);"
+                                                                                @click="isHidden ? unhideComment() : hideComment()"
+                                                                                :title="isHidden ? 'Unhide reply' : 'Hide reply'">
+                                                                                <i :data-lucide="isHidden ? 'eye' : 'x'"
+                                                                                    style="width:12px; height:12px; color:var(--text-secondary);"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Reply Text -->
+                                                                    <div x-show="!editing"
+                                                                        style="font-size:12px; color:var(--text-secondary); margin-top:2px; word-break:break-word;">
+                                                                        <span
+                                                                            x-text="commentText">{{ $reply->comment }}</span>
+                                                                    </div>
+
+                                                                    <!-- Inline Edit -->
+                                                                    <div x-show="editing" x-cloak style="margin-top:6px;">
+                                                                        <form @submit.prevent="saveEdit()">
+                                                                            <textarea x-model="editText" class="form-control" rows="2" maxlength="1000" required
+                                                                                style="font-size:12px; padding:6px 8px; width:100%; border-radius:var(--radius-sm);"></textarea>
+                                                                            <div
+                                                                                style="display:flex; justify-content:flex-end; gap:6px; margin-top:4px;">
+                                                                                <button type="button"
+                                                                                    class="btn btn-ghost btn-sm"
+                                                                                    @click="cancelEdit()"
+                                                                                    style="padding:2px 8px; font-size:11px;">Cancel</button>
+                                                                                <button type="submit"
+                                                                                    class="btn btn-primary btn-sm"
+                                                                                    :disabled="isSaving || !editText.trim()"
+                                                                                    style="padding:2px 10px; font-size:11px;">
+                                                                                    <span
+                                                                                        x-text="isSaving ? 'Saving...' : 'Save'"></span>
+                                                                                </button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+
+                                                                    <!-- Reply Action Footer: Reactions & Reply -->
+                                                                    <div
+                                                                        style="display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap; position:relative;">
+                                                                        <!-- Reaction Picker -->
+                                                                        <div style="position:relative;"
+                                                                            @click.outside="pickerOpen = false"
+                                                                            @keydown.escape.window="pickerOpen = false">
+                                                                            <button type="button"
+                                                                                class="comment-action-pill"
+                                                                                :class="{ 'active': userReaction }"
+                                                                                @click="pickerOpen = !pickerOpen"
+                                                                                title="React">
+                                                                                <span
+                                                                                    x-text="reactionEmoji(userReaction) || '👍'"
+                                                                                    style="font-size:12px;"></span>
+                                                                                <span
+                                                                                    x-text="userReaction ? capitalize(userReaction) : 'React'"
+                                                                                    style="font-size:10.5px;"></span>
+                                                                            </button>
+                                                                            <div x-show="pickerOpen" x-cloak
+                                                                                class="reaction-popover"
+                                                                                style="position:absolute; bottom:calc(100% + 4px); left:0; background:var(--bg-card); border:1px solid var(--border); border-radius:20px; box-shadow:0 6px 20px rgba(0,0,0,0.5); backdrop-filter:blur(20px); z-index:120; display:flex; gap:4px; padding:3px 6px;">
+                                                                                <button type="button"
+                                                                                    @click="toggleReaction('like')"
+                                                                                    class="reaction-emoji-btn"
+                                                                                    :class="{ 'selected': userReaction === 'like' }"
+                                                                                    title="Like">👍</button>
+                                                                                <button type="button"
+                                                                                    @click="toggleReaction('love')"
+                                                                                    class="reaction-emoji-btn"
+                                                                                    :class="{ 'selected': userReaction === 'love' }"
+                                                                                    title="Love">❤️</button>
+                                                                                <button type="button"
+                                                                                    @click="toggleReaction('celebrate')"
+                                                                                    class="reaction-emoji-btn"
+                                                                                    :class="{ 'selected': userReaction === 'celebrate' }"
+                                                                                    title="Celebrate">🎉</button>
+                                                                                <button type="button"
+                                                                                    @click="toggleReaction('laugh')"
+                                                                                    class="reaction-emoji-btn"
+                                                                                    :class="{ 'selected': userReaction === 'laugh' }"
+                                                                                    title="Laugh">😂</button>
+                                                                                <button type="button"
+                                                                                    @click="toggleReaction('fire')"
+                                                                                    class="reaction-emoji-btn"
+                                                                                    :class="{ 'selected': userReaction === 'fire' }"
+                                                                                    title="Fire">🔥</button>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Reaction counts -->
+                                                                        <div
+                                                                            style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
+                                                                            <template
+                                                                                x-for="(count, type) in reactionCounts"
+                                                                                :key="type">
+                                                                                <button type="button" x-show="count > 0"
+                                                                                    @click="toggleReaction(type)"
+                                                                                    class="reaction-badge-pill"
+                                                                                    :class="{ 'user-reacted': userReaction ===
+                                                                                            type }">
+                                                                                    <span
+                                                                                        x-text="reactionEmoji(type)"></span>
+                                                                                    <span x-text="count"
+                                                                                        style="font-size:10.5px;"></span>
+                                                                                </button>
+                                                                            </template>
+                                                                        </div>
+
+                                                                        <!-- Reply button on reply -> activates root comment reply composer targeting this user -->
+                                                                        <button type="button" class="comment-action-pill"
+                                                                            @click="$dispatch('open-reply-composer', { commentId: {{ $comment->id }}, mentionName: '{{ $reply->user->name }}' })"
+                                                                            title="Reply to {{ $reply->user->name }}">
+                                                                            <i data-lucide="reply"
+                                                                                style="width:11px; height:11px;"></i>
+                                                                            <span style="font-size:10.5px;">Reply</span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 @empty
                                     <div
@@ -524,11 +902,11 @@
 
                             <!-- Post a Comment Input Form -->
                             <form action="{{ route('fitness.comment', $post) }}" method="POST"
-                                style="display:flex; gap:8px; align-items:center;">
+                                style="display:flex; gap:8px; align-items:center; width:100%; box-sizing:border-box;">
                                 @csrf
                                 <input type="text" name="comment" class="form-control"
                                     placeholder="Write a supportive comment..." required maxlength="1000"
-                                    style="font-size:13px;">
+                                    style="font-size:12.5px; flex:1 1 0; min-width:0; box-sizing:border-box;">
                                 <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink:0;">
                                     <i data-lucide="send" style="width:13px; height:13px;"></i>
                                     Post
@@ -622,7 +1000,7 @@
                 </div>
 
                 <!-- Optional Metrics Row -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;" class="form-group">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;" class="form-group modal-metrics-grid">
                     <div>
                         <label class="form-label" for="duration_minutes">Duration (Minutes)</label>
                         <div class="input-icon-wrap" style="position:relative;">
@@ -745,6 +1123,114 @@
 
     @push('styles')
         <style>
+            /* Responsive Share Workout Button in Top Header */
+            .btn-share-workout {
+                padding: 8px 14px;
+                font-size: 13px;
+                gap: 6px;
+            }
+            .btn-share-text-short {
+                display: none;
+            }
+            @media (max-width: 640px) {
+                .btn-share-workout {
+                    padding: 6px 10px;
+                    font-size: 12px;
+                    gap: 4px;
+                }
+            }
+            @media (max-width: 430px) {
+                .btn-share-workout {
+                    padding: 6px 8px;
+                    font-size: 11.5px;
+                }
+                .btn-share-text-full {
+                    display: none;
+                }
+                .btn-share-text-short {
+                    display: inline;
+                }
+            }
+            @media (max-width: 340px) {
+                .btn-share-workout {
+                    padding: 6px 6px;
+                    font-size: 11px;
+                }
+            }
+
+            /* Container & Layout Constraints */
+            .fitness-container,
+            .fitness-metrics-grid,
+            .fitness-filter-card,
+            .fitness-feed-stream,
+            .post-card,
+            .post-interactions-wrap,
+            .post-comments-thread,
+            .comment-item-card,
+            .reply-item-card {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            .replies-thread-container {
+                margin-left: 12px;
+                padding-left: 10px;
+                border-left: 2px solid rgba(124, 58, 237, 0.25);
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                min-width: 0;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .post-dropdown-menu {
+                position: absolute;
+                right: 0;
+                top: calc(100% + 6px);
+                min-width: 180px;
+                max-width: calc(100vw - 32px);
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-md);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+                z-index: 100;
+                padding: 4px 0;
+                backdrop-filter: blur(20px);
+            }
+
+            .comment-dropdown-menu {
+                position: absolute;
+                right: 0;
+                top: calc(100% + 4px);
+                min-width: 150px;
+                max-width: calc(100vw - 32px);
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-md);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+                z-index: 110;
+                padding: 4px 0;
+                backdrop-filter: blur(20px);
+            }
+
+            .reaction-popover {
+                position: absolute;
+                bottom: calc(100% + 4px);
+                left: 0;
+                max-width: calc(100vw - 32px);
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 24px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+                backdrop-filter: blur(24px);
+                z-index: 120;
+                display: flex;
+                gap: 4px;
+                padding: 3px 6px;
+            }
+
             /* Post & Comment action dropdown menu items */
             .post-menu-item,
             .comment-menu-item {
@@ -787,6 +1273,131 @@
             .glass-card .btn-icon:focus-visible {
                 outline: 2px solid var(--accent-purple);
                 outline-offset: 2px;
+            }
+
+            /* Reaction & Reply Pills */
+            .comment-action-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 3px 8px;
+                border-radius: 14px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid var(--border);
+                color: var(--text-muted);
+                font-size: 11px;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+
+            .comment-action-pill:hover {
+                background: rgba(124, 58, 237, 0.1);
+                border-color: rgba(124, 58, 237, 0.3);
+                color: var(--text-primary);
+            }
+
+            .comment-action-pill.active {
+                background: rgba(124, 58, 237, 0.18);
+                border-color: rgba(124, 58, 237, 0.45);
+                color: #a78bfa;
+            }
+
+            .reaction-badge-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+                padding: 2px 7px;
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid var(--border);
+                font-size: 11px;
+                color: var(--text-secondary);
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+
+            .reaction-badge-pill:hover {
+                background: rgba(124, 58, 237, 0.12);
+                border-color: rgba(124, 58, 237, 0.35);
+            }
+
+            .reaction-badge-pill.user-reacted {
+                background: rgba(124, 58, 237, 0.2);
+                border-color: rgba(124, 58, 237, 0.5);
+                color: #c4b5fd;
+                font-weight: 600;
+            }
+
+            .reaction-emoji-btn {
+                font-size: 17px;
+                line-height: 1;
+                padding: 4px 6px;
+                background: none;
+                border: none;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: transform 0.12s ease, background 0.12s ease;
+            }
+
+            .reaction-emoji-btn:hover {
+                transform: scale(1.3);
+                background: rgba(124, 58, 237, 0.2);
+            }
+
+            .reaction-emoji-btn.selected {
+                background: rgba(124, 58, 237, 0.3);
+                box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);
+            }
+
+            @media (max-width: 480px) {
+                .fitness-container {
+                    gap: 14px !important;
+                }
+                .fitness-metrics-grid {
+                    gap: 8px !important;
+                }
+                .fitness-filter-card {
+                    padding: 10px 12px !important;
+                }
+                .post-header {
+                    padding: 12px 12px 10px 12px !important;
+                }
+                .post-metrics-bar {
+                    padding: 8px 12px !important;
+                    gap: 6px 10px !important;
+                }
+                .post-caption {
+                    padding: 12px 12px 10px 12px !important;
+                    font-size: 13px !important;
+                }
+                .post-image-wrap {
+                    padding: 0 12px 12px 12px !important;
+                }
+                .post-actions-bar {
+                    padding: 8px 12px !important;
+                }
+                .post-comments-thread {
+                    padding: 12px 10px !important;
+                }
+                .comment-item-card {
+                    padding: 8px 8px !important;
+                }
+                .reply-item-card {
+                    padding: 6px 6px !important;
+                }
+                .replies-thread-container {
+                    margin-left: 6px !important;
+                    padding-left: 6px !important;
+                    gap: 6px !important;
+                }
+                .reaction-popover {
+                    left: auto !important;
+                    right: 0 !important;
+                }
+                .modal-metrics-grid {
+                    grid-template-columns: 1fr !important;
+                    gap: 10px !important;
+                }
             }
         </style>
     @endpush
@@ -832,7 +1443,6 @@
                             });
                             const data = await res.json();
 
-                            // Fade out the post card
                             const card = document.getElementById('post-' + this.postId);
                             if (card) {
                                 card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
@@ -843,7 +1453,6 @@
                                 }, 300);
                             }
 
-                            // Show undo toast
                             showUndoToast('Post hidden from your feed.', async () => {
                                 await fetch(`/fitness/${this.postId}/hide`, {
                                     method: 'DELETE',
@@ -854,7 +1463,6 @@
                                         'X-Requested-With': 'XMLHttpRequest',
                                     },
                                 });
-                                // Restore the card
                                 if (card) {
                                     card.style.display = '';
                                     card.style.opacity = '1';
@@ -884,7 +1492,6 @@
                             if (e.name === 'AbortError') return;
                         }
 
-                        // Fallback: copy link to clipboard
                         try {
                             await navigator.clipboard.writeText(shareUrl);
                             showToast('Link copied to clipboard!', 'success');
@@ -902,19 +1509,103 @@
             }
 
             /**
-             * Alpine.js component for per-comment actions (edit, delete, hide, copy).
+             * Alpine.js component for per-comment & per-reply actions.
              */
-            function commentActions(commentId, postId, initialComment, initialEdited, initialHidden) {
+            function commentActions(commentId, postId, initialComment, initialEdited, initialHidden, initialReaction,
+                initialReactionCounts, initialTotalReactions, authorName) {
                 return {
                     commentId: commentId,
                     postId: postId,
                     commentText: initialComment,
                     editText: initialComment,
+                    authorName: authorName,
                     editing: false,
                     isEdited: initialEdited,
                     isHidden: initialHidden,
                     isSaving: false,
                     menuOpen: false,
+
+                    // Reaction state
+                    pickerOpen: false,
+                    userReaction: initialReaction,
+                    reactionCounts: initialReactionCounts || {},
+                    totalReactions: initialTotalReactions || 0,
+
+                    // Reply state
+                    replying: false,
+                    replyText: '',
+                    replyingToName: authorName,
+                    isSubmittingReply: false,
+                    repliesOpen: true,
+
+                    init() {
+                        window.addEventListener('open-reply-composer', (e) => {
+                            if (e.detail && e.detail.commentId === this.commentId) {
+                                this.openReply(e.detail.mentionName);
+                            }
+                        });
+                    },
+
+                    reactionEmoji(type) {
+                        const map = {
+                            like: '👍',
+                            love: '❤️',
+                            celebrate: '🎉',
+                            laugh: '😂',
+                            fire: '🔥'
+                        };
+                        return map[type] || '';
+                    },
+
+                    capitalize(str) {
+                        if (!str) return '';
+                        return str.charAt(0).toUpperCase() + str.slice(1);
+                    },
+
+                    async toggleReaction(type) {
+                        this.pickerOpen = false;
+                        try {
+                            const res = await fetch(`/fitness/comments/${this.commentId}/react`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                                body: JSON.stringify({
+                                    reaction_type: type
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                this.userReaction = data.user_reaction;
+                                this.reactionCounts = data.reaction_counts || {};
+                                this.totalReactions = data.total_reactions || 0;
+                                showToast(data.message, 'success');
+                            }
+                        } catch (e) {
+                            showToast('Failed to update reaction.', 'error');
+                        }
+                    },
+
+                    openReply(mentionName = null) {
+                        this.replying = true;
+                        this.replyingToName = mentionName || this.authorName;
+                        this.replyText = mentionName ? `@${mentionName} ` : '';
+                        this.$nextTick(() => {
+                            const form = this.$el.querySelector('textarea[name="comment"]');
+                            if (form) {
+                                form.focus();
+                                form.selectionStart = form.selectionEnd = form.value.length;
+                            }
+                        });
+                    },
+
+                    cancelReply() {
+                        this.replying = false;
+                        this.replyText = '';
+                    },
 
                     startEdit() {
                         this.editText = this.commentText;
@@ -966,7 +1657,7 @@
                     },
 
                     async deleteComment() {
-                        if (!confirm('Are you sure you want to delete this comment?')) {
+                        if (!confirm('Are you sure you want to delete this?')) {
                             return;
                         }
 
@@ -981,13 +1672,12 @@
                             });
 
                             if (!res.ok) {
-                                showToast('Failed to delete comment.', 'error');
+                                showToast('Failed to delete.', 'error');
                                 return;
                             }
 
                             const data = await res.json();
 
-                            // Animate removal
                             const el = document.getElementById('comment-' + this.commentId);
                             if (el) {
                                 el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
@@ -996,7 +1686,6 @@
                                 setTimeout(() => el.remove(), 250);
                             }
 
-                            // Update comments counter
                             if (typeof data.comments_count !== 'undefined') {
                                 const countEl = document.getElementById('comments-count-' + this.postId);
                                 if (countEl) {
@@ -1005,9 +1694,9 @@
                                 }
                             }
 
-                            showToast(data.message || 'Comment deleted.', 'success');
+                            showToast(data.message || 'Deleted successfully.', 'success');
                         } catch (e) {
-                            showToast('Failed to delete comment.', 'error');
+                            showToast('Failed to delete.', 'error');
                         }
                     },
 
@@ -1025,7 +1714,6 @@
                             const data = await res.json();
                             this.isHidden = true;
 
-                            // Animate hide
                             const el = document.getElementById('comment-' + this.commentId);
                             if (el) {
                                 el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
@@ -1036,7 +1724,7 @@
                                 }, 250);
                             }
 
-                            showUndoToast('Comment hidden from your view.', async () => {
+                            showUndoToast('Hidden from your view.', async () => {
                                 await fetch(`/fitness/comments/${this.commentId}/hide`, {
                                     method: 'DELETE',
                                     headers: {
@@ -1052,10 +1740,10 @@
                                     el.style.opacity = '1';
                                     el.style.transform = 'none';
                                 }
-                                showToast('Comment restored to your view.', 'success');
+                                showToast('Restored to your view.', 'success');
                             });
                         } catch (e) {
-                            showToast('Failed to hide comment.', 'error');
+                            showToast('Failed to hide.', 'error');
                         }
                     },
 
@@ -1072,9 +1760,9 @@
 
                             const data = await res.json();
                             this.isHidden = false;
-                            showToast(data.message || 'Comment restored to your view.', 'success');
+                            showToast(data.message || 'Restored to your view.', 'success');
                         } catch (e) {
-                            showToast('Failed to unhide comment.', 'error');
+                            showToast('Failed to unhide.', 'error');
                         }
                     },
 
@@ -1082,11 +1770,11 @@
                         try {
                             if (navigator.clipboard && navigator.clipboard.writeText) {
                                 await navigator.clipboard.writeText(this.commentText);
-                                showToast('Comment copied to clipboard!', 'success');
+                                showToast('Copied to clipboard!', 'success');
                                 return;
                             }
                         } catch (e) {
-                            // Fallback below
+                            // Fallback
                         }
 
                         try {
@@ -1099,16 +1787,16 @@
                             tmp.select();
                             document.execCommand('copy');
                             document.body.removeChild(tmp);
-                            showToast('Comment copied to clipboard!', 'success');
+                            showToast('Copied to clipboard!', 'success');
                         } catch (e) {
-                            showToast('Failed to copy comment.', 'error');
+                            showToast('Failed to copy.', 'error');
                         }
                     },
                 };
             }
 
             /**
-             * Alpine.js component for the report modal (supports posts & comments).
+             * Alpine.js component for the report modal.
              */
             function reportModal() {
                 return {
