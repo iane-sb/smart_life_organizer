@@ -41,7 +41,8 @@
             <div class="grid-3" style="gap: 16px;">
                 <!-- Dark Mode -->
                 <label style="cursor: pointer; position: relative;" onclick="window.selectThemeOption('dark')">
-                    <input type="radio" name="theme_preference" id="theme-radio-dark" value="dark" onclick="event.stopPropagation()"
+                    <input type="radio" name="theme_preference" id="theme-radio-dark" value="dark"
+                        onclick="event.stopPropagation()"
                         {{ ($user->theme_preference ?? 'dark') === 'dark' ? 'checked' : '' }} style="display:none;">
                     <div id="theme-card-dark" class="theme-card" data-theme-val="dark"
                         style="padding: 18px; border-radius: var(--radius-md); background: var(--bg-card); border: 2px solid {{ ($user->theme_preference ?? 'dark') === 'dark' ? '#7c3aed' : 'var(--border)' }}; transition: all var(--transition); height: 100%; display: flex; flex-direction: column;">
@@ -86,7 +87,8 @@
 
                 <!-- Light Mode -->
                 <label style="cursor: pointer; position: relative;" onclick="window.selectThemeOption('light')">
-                    <input type="radio" name="theme_preference" id="theme-radio-light" value="light" onclick="event.stopPropagation()"
+                    <input type="radio" name="theme_preference" id="theme-radio-light" value="light"
+                        onclick="event.stopPropagation()"
                         {{ ($user->theme_preference ?? 'dark') === 'light' ? 'checked' : '' }} style="display:none;">
                     <div id="theme-card-light" class="theme-card" data-theme-val="light"
                         style="padding: 18px; border-radius: var(--radius-md); background: var(--bg-card); border: 2px solid {{ ($user->theme_preference ?? 'dark') === 'light' ? '#7c3aed' : 'var(--border)' }}; transition: all var(--transition); height: 100%; display: flex; flex-direction: column;">
@@ -128,7 +130,8 @@
 
                 <!-- System Mode -->
                 <label style="cursor: pointer; position: relative;" onclick="window.selectThemeOption('system')">
-                    <input type="radio" name="theme_preference" id="theme-radio-system" value="system" onclick="event.stopPropagation()"
+                    <input type="radio" name="theme_preference" id="theme-radio-system" value="system"
+                        onclick="event.stopPropagation()"
                         {{ ($user->theme_preference ?? 'dark') === 'system' ? 'checked' : '' }} style="display:none;">
                     <div id="theme-card-system" class="theme-card" data-theme-val="system"
                         style="padding: 18px; border-radius: var(--radius-md); background: var(--bg-card); border: 2px solid {{ ($user->theme_preference ?? 'dark') === 'system' ? '#7c3aed' : 'var(--border)' }}; transition: all var(--transition); height: 100%; display: flex; flex-direction: column;">

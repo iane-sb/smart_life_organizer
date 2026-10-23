@@ -46,8 +46,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Fitness Community
     Route::get('/fitness', [FitnessCommunityController::class, 'index'])->name('fitness.index');
     Route::post('/fitness', [FitnessCommunityController::class, 'store'])->name('fitness.store');
+    Route::get('/fitness/{post}/edit', [FitnessCommunityController::class, 'edit'])->name('fitness.edit');
+    Route::put('/fitness/{post}', [FitnessCommunityController::class, 'update'])->name('fitness.update');
     Route::post('/fitness/{post}/like', [FitnessCommunityController::class, 'toggleLike'])->name('fitness.like');
     Route::post('/fitness/{post}/comments', [FitnessCommunityController::class, 'storeComment'])->name('fitness.comment');
+    Route::post('/fitness/{post}/save', [FitnessCommunityController::class, 'toggleSave'])->name('fitness.save');
+    Route::post('/fitness/{post}/hide', [FitnessCommunityController::class, 'hide'])->name('fitness.hide');
+    Route::delete('/fitness/{post}/hide', [FitnessCommunityController::class, 'unhide'])->name('fitness.unhide');
+    Route::post('/fitness/{post}/report', [FitnessCommunityController::class, 'report'])->name('fitness.report');
+    Route::get('/fitness/{post}/share', [FitnessCommunityController::class, 'share'])->name('fitness.share');
     Route::delete('/fitness/{post}', [FitnessCommunityController::class, 'destroy'])->name('fitness.destroy');
     Route::delete('/fitness/comments/{comment}', [FitnessCommunityController::class, 'destroyComment'])->name('fitness.comment.destroy');
 });

@@ -1234,6 +1234,10 @@
                 <i data-lucide="layout-dashboard"></i>
                 Dashboard
             </a>
+            <a href="{{ route('fitness.index') }}" class="nav-item {{ request()->routeIs('fitness.*') ? 'active' : '' }}">
+                <i data-lucide="dumbbell"></i>
+                Fitness Community
+            </a>
             <a href="{{ route('tasks.index') }}" class="nav-item {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
                 <i data-lucide="check-square"></i>
                 Tasks
@@ -1246,11 +1250,7 @@
                 <i data-lucide="sticky-note"></i>
                 Notes
             </a>
-            <a href="{{ route('fitness.index') }}" class="nav-item {{ request()->routeIs('fitness.*') ? 'active' : '' }}">
-                <i data-lucide="dumbbell"></i>
-                Fitness Community
-            </a>
-
+            
             <div class="nav-section-label">Account</div>
 
             <a href="{{ route('profile.edit') }}" class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
@@ -1334,6 +1334,10 @@
             <i data-lucide="layout-dashboard"></i>
             <span>Home</span>
         </a>
+        <a href="{{ route('fitness.index') }}" class="dock-item {{ request()->routeIs('fitness.*') ? 'active' : '' }}">
+            <i data-lucide="dumbbell"></i>
+            <span>Community</span>
+        </a>
         <a href="{{ route('tasks.index') }}" class="dock-item {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
             <i data-lucide="check-square"></i>
             <span>Tasks</span>
@@ -1345,10 +1349,6 @@
         <a href="{{ route('notes.index') }}" class="dock-item {{ request()->routeIs('notes.*') ? 'active' : '' }}">
             <i data-lucide="sticky-note"></i>
             <span>Notes</span>
-        </a>
-        <a href="{{ route('fitness.index') }}" class="dock-item {{ request()->routeIs('fitness.*') ? 'active' : '' }}">
-            <i data-lucide="dumbbell"></i>
-            <span>Fitness</span>
         </a>
         <a href="{{ route('profile.edit') }}" class="dock-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <i data-lucide="user"></i>
