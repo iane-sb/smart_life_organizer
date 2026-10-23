@@ -58,20 +58,32 @@
                             style="padding-left:38px;">
                     </div>
 
-                    <div style="display:flex; gap:8px; align-items:center;">
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                         <button type="submit" class="btn btn-ghost btn-sm">Filter</button>
-                        @if (request('type') || request('search') || $showHidden)
+                        @if (request('type') || request('search') || $showHidden || $showHiddenComments)
                             <a href="{{ route('fitness.index') }}" class="btn btn-ghost btn-sm"
                                 style="color:var(--text-muted);">Reset</a>
                         @endif
 
                         <!-- Hidden posts toggle -->
                         @if (!$showHidden && $hiddenCount > 0)
-                            <a href="{{ route('fitness.index', ['show_hidden' => 1]) }}" class="btn btn-ghost btn-sm"
+                            <a href="{{ route('fitness.index', array_merge(request()->query(), ['show_hidden' => 1])) }}"
+                                class="btn btn-ghost btn-sm"
                                 style="color:#f59e0b; border-color:rgba(245,158,11,0.3); font-size:11.5px;"
                                 title="View {{ $hiddenCount }} hidden {{ Str::plural('post', $hiddenCount) }}">
                                 <i data-lucide="eye-off" style="width:13px; height:13px;"></i>
-                                Hidden ({{ $hiddenCount }})
+                                Hidden Posts ({{ $hiddenCount }})
+                            </a>
+                        @endif
+
+                        <!-- Hidden comments toggle -->
+                        @if ($hiddenCommentsCount > 0)
+                            <a href="{{ route('fitness.index', array_merge(request()->query(), ['show_hidden_comments' => $showHiddenComments ? null : 1])) }}"
+                                class="btn btn-ghost btn-sm"
+                                style="color:#f59e0b; border-color:rgba(245,158,11,0.3); font-size:11.5px;"
+                                title="Toggle hidden comments">
+                                <i data-lucide="eye-off" style="width:13px; height:13px;"></i>
+                                {{ $showHiddenComments ? 'Hide Hidden Comments' : 'Hidden Comments (' . $hiddenCommentsCount . ')' }}
                             </a>
                         @endif
                     </div>
@@ -104,9 +116,28 @@
                     <span style="font-size:12px; color:var(--text-muted);">These posts are hidden from your normal
                         feed.</span>
                 </div>
-                <a href="{{ route('fitness.index') }}" class="btn btn-ghost btn-sm" style="font-size:12px;">
+                <a href="{{ route('fitness.index', request()->except('show_hidden')) }}" class="btn btn-ghost btn-sm"
+                    style="font-size:12px;">
                     <i data-lucide="arrow-left" style="width:13px; height:13px;"></i>
                     Back to Feed
+                </a>
+            </div>
+        @endif
+
+        <!-- Hidden Comments Banner -->
+        @if ($showHiddenComments)
+            <div class="glass-card animate-in"
+                style="padding:14px 20px; display:flex; align-items:center; justify-content:space-between; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <i data-lucide="message-square" style="width:18px; height:18px; color:#f59e0b;"></i>
+                    <span style="font-size:13px; color:var(--text-primary); font-weight:600;">Showing Hidden Comments</span>
+                    <span style="font-size:12px; color:var(--text-muted);">Previously hidden comments are displayed with an
+                        unhide option.</span>
+                </div>
+                <a href="{{ route('fitness.index', request()->except('show_hidden_comments')) }}"
+                    class="btn btn-ghost btn-sm" style="font-size:12px;">
+                    <i data-lucide="arrow-left" style="width:13px; height:13px;"></i>
+                    Standard Comments View
                 </a>
             </div>
         @endif
@@ -147,9 +178,9 @@
                                 @keydown.escape.window="menuOpen = false">
                                 <button type="button" class="btn-icon"
                                     style="width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border); transition:all 0.15s ease;"
-                                    @click="menuOpen = !menuOpen" @click.outside="menuOpen = false"
-                                    :aria-expanded="menuOpen.toString()" aria-haspopup="true" aria-label="Post actions menu"
-                                    title="More actions">
+                                    @click="menuOpen = !menuOpen; if(menuOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
+                                    @click.outside="menuOpen = false" :aria-expanded="menuOpen.toString()"
+                                    aria-haspopup="true" aria-label="Post actions menu" title="More actions">
                                     <i data-lucide="more-vertical"
                                         style="width:15px; height:15px; color:var(--text-secondary);"></i>
                                 </button>
@@ -216,7 +247,7 @@
                                         <div style="border-top:1px solid var(--border); margin:4px 0;"></div>
                                         <button type="button" role="menuitem" class="post-menu-item"
                                             style="color:#f59e0b;"
-                                            @click="menuOpen = false; $dispatch('open-report-modal', { postId: {{ $post->id }} })">
+                                            @click="menuOpen = false; $dispatch('open-report-modal', { targetId: {{ $post->id }}, type: 'post' })">
                                             <i data-lucide="flag" style="width:14px; height:14px;"></i>
                                             Report post
                                         </button>
@@ -250,7 +281,7 @@
                     <!-- Workout Category + Performance Metrics Bar -->
                     <div
                         style="display:flex; gap:14px; padding:10px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); font-size:12px; color:var(--text-secondary); flex-wrap:wrap; align-items:center;">
-                        <!-- Category Chip (relocated from header) -->
+                        <!-- Category Chip -->
                         <span class="badge"
                             style="background:rgba(124,58,237,0.15); color:{{ $post->workout_badge_color }}; border:1px solid {{ $post->workout_badge_color }}40; font-size:11px;">
                             {{ ucfirst($post->workout_type) }}
@@ -304,10 +335,12 @@
                             </form>
 
                             <!-- Toggle Comments Button -->
-                            <button type="button" @click="commentsOpen = !commentsOpen" class="btn-icon"
+                            <button type="button"
+                                @click="commentsOpen = !commentsOpen; if(commentsOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
+                                class="btn-icon"
                                 style="padding:6px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; font-size:12.5px;">
                                 <i data-lucide="message-circle" style="width:15px; height:15px;"></i>
-                                <span>{{ $post->comments->count() }}
+                                <span id="comments-count-{{ $post->id }}">{{ $post->comments->count() }}
                                     {{ Str::plural('Comment', $post->comments->count()) }}</span>
                             </button>
 
@@ -319,47 +352,165 @@
                             </span>
                         </div>
 
-                        <span style="font-size:11.5px; color:var(--text-muted);">
-                            Community Post #{{ $post->id }}
-                        </span>
-
                         <!-- Comments Thread (Collapsible via Alpine) -->
                         <div x-show="commentsOpen" x-cloak
-                            style="width:100%; margin-top:14px; border-top:1px solid var(--border); padding-top:14px;">
+                            style="width:100%; margin-top:14px; border-top:1px solid var(--border); padding-top:14px; overflow:visible;">
                             <!-- Existing Comments List -->
-                            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+                            <div
+                                style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px; overflow:visible;">
                                 @forelse($post->comments as $comment)
-                                    <div
-                                        style="display:flex; gap:10px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius-sm);">
+                                    @php
+                                        $isCommentAuthor = $comment->user_id === Auth::id();
+                                        $isPostOwner = $post->user_id === Auth::id();
+                                        $isCommentHidden = $comment->isHiddenBy(Auth::user());
+                                    @endphp
+                                    <div class="comment-item-card" id="comment-{{ $comment->id }}"
+                                        x-data="commentActions({{ $comment->id }}, {{ $post->id }}, {{ json_encode($comment->comment) }}, {{ $comment->isEdited() ? 'true' : 'false' }}, {{ $isCommentHidden ? 'true' : 'false' }})"
+                                        style="display:flex; gap:10px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius-sm); position:relative; overflow:visible;">
                                         <img src="{{ $comment->user->avatar_url }}" alt="{{ $comment->user->name }}"
                                             style="width:28px; height:28px; border-radius:50%; object-fit:cover; flex-shrink:0;">
-                                        <div style="flex:1; min-width:0;">
+                                        <div style="flex:1; min-width:0; position:relative; overflow:visible;">
+                                            <!-- Comment Header -->
                                             <div
                                                 style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                                                <div style="font-size:12px; font-weight:700; color:var(--text-primary);">
-                                                    {{ $comment->user->name }}
+                                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                                                     <span
-                                                        style="font-size:10.5px; font-weight:400; color:var(--text-muted); margin-left:4px;">
+                                                        style="font-size:12px; font-weight:700; color:var(--text-primary);">{{ $comment->user->name }}</span>
+                                                    <span
+                                                        style="font-size:10.5px; font-weight:400; color:var(--text-muted);">
                                                         {{ $comment->created_at->diffForHumans() }}
+                                                    </span>
+                                                    <!-- Edited indicator -->
+                                                    <span x-show="isEdited" x-cloak
+                                                        style="font-size:10px; color:var(--text-muted); font-style:italic;"
+                                                        title="Comment was edited">(edited)</span>
+                                                    @if ($comment->isEdited())
+                                                        <span x-show="!isEdited"
+                                                            style="font-size:10px; color:var(--text-muted); font-style:italic;">(edited)</span>
+                                                    @endif
+                                                    <!-- Hidden badge -->
+                                                    <span x-show="isHidden" class="badge"
+                                                        style="background:rgba(245,158,11,0.15); color:#f59e0b; font-size:10px; border:1px solid rgba(245,158,11,0.3); padding:1px 6px;">
+                                                        Hidden by you
                                                     </span>
                                                 </div>
 
-                                                @if ($comment->user_id === Auth::id() || $post->user_id === Auth::id())
-                                                    <form action="{{ route('fitness.comment.destroy', $comment) }}"
-                                                        method="POST" style="margin:0;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            style="background:none; border:none; color:#f87171; cursor:pointer; padding:2px;"
-                                                            title="Delete comment">
-                                                            <i data-lucide="x" style="width:13px; height:13px;"></i>
+                                                <!-- Comment Controls (Three-dot & X) -->
+                                                <div style="display:flex; align-items:center; gap:4px; position:relative;">
+                                                    <!-- Three-Dot Menu -->
+                                                    <div style="position:relative;"
+                                                        @keydown.escape.window="menuOpen = false">
+                                                        <button type="button" class="btn-icon"
+                                                            style="width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border); transition:all 0.15s ease;"
+                                                            @click="menuOpen = !menuOpen; if(menuOpen) $nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); })"
+                                                            @click.outside="menuOpen = false"
+                                                            :aria-expanded="menuOpen.toString()" aria-haspopup="true"
+                                                            aria-label="Comment actions" title="Comment actions">
+                                                            <i data-lucide="more-vertical"
+                                                                style="width:13px; height:13px; color:var(--text-secondary);"></i>
                                                         </button>
-                                                    </form>
-                                                @endif
+
+                                                        <!-- Dropdown Menu -->
+                                                        <div x-show="menuOpen"
+                                                            x-transition:enter="transition ease-out duration-100"
+                                                            x-transition:enter-start="opacity-0 scale-95"
+                                                            x-transition:enter-end="opacity-100 scale-100"
+                                                            x-transition:leave="transition ease-in duration-75"
+                                                            x-transition:leave-start="opacity-100 scale-100"
+                                                            x-transition:leave-end="opacity-0 scale-95" x-cloak
+                                                            role="menu" aria-label="Comment action menu"
+                                                            style="position:absolute; right:0; top:calc(100% + 4px); min-width:160px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:0 8px 30px rgba(0,0,0,0.4); z-index:100; padding:4px 0; backdrop-filter:blur(20px);">
+
+                                                            @if ($isCommentAuthor)
+                                                                {{-- Edit comment --}}
+                                                                <button type="button" role="menuitem"
+                                                                    class="comment-menu-item" @click="startEdit()">
+                                                                    <i data-lucide="pencil"
+                                                                        style="width:13px; height:13px;"></i>
+                                                                    Edit comment
+                                                                </button>
+                                                            @endif
+
+                                                            {{-- Copy comment --}}
+                                                            <button type="button" role="menuitem"
+                                                                class="comment-menu-item"
+                                                                @click="copyComment(); menuOpen = false">
+                                                                <i data-lucide="copy"
+                                                                    style="width:13px; height:13px;"></i>
+                                                                Copy comment
+                                                            </button>
+
+                                                            {{-- Hide / Unhide comment --}}
+                                                            <button type="button" role="menuitem"
+                                                                class="comment-menu-item"
+                                                                @click="isHidden ? unhideComment() : hideComment(); menuOpen = false">
+                                                                <i :data-lucide="isHidden ? 'eye' : 'eye-off'"
+                                                                    style="width:13px; height:13px;"></i>
+                                                                <span
+                                                                    x-text="isHidden ? 'Unhide comment' : 'Hide comment'"></span>
+                                                            </button>
+
+                                                            {{-- Report comment --}}
+                                                            <button type="button" role="menuitem"
+                                                                class="comment-menu-item" style="color:#f59e0b;"
+                                                                @click="menuOpen = false; $dispatch('open-report-modal', { targetId: {{ $comment->id }}, type: 'comment' })">
+                                                                <i data-lucide="flag"
+                                                                    style="width:13px; height:13px;"></i>
+                                                                Report comment
+                                                            </button>
+
+                                                            @if ($isCommentAuthor || $isPostOwner)
+                                                                <div
+                                                                    style="border-top:1px solid var(--border); margin:4px 0;">
+                                                                </div>
+                                                                {{-- Delete comment --}}
+                                                                <button type="button" role="menuitem"
+                                                                    class="comment-menu-item" style="color:#f87171;"
+                                                                    @click="deleteComment(); menuOpen = false">
+                                                                    <i data-lucide="trash-2"
+                                                                        style="width:13px; height:13px;"></i>
+                                                                    Delete comment
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- X Button (Hide or Unhide) -->
+                                                    <button type="button" class="btn-icon"
+                                                        style="width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); border:1px solid var(--border); transition:all 0.15s ease;"
+                                                        @click="isHidden ? unhideComment() : hideComment()"
+                                                        :title="isHidden ? 'Unhide comment' : 'Hide comment from your view'"
+                                                        :aria-label="isHidden ? 'Unhide comment' : 'Hide comment'">
+                                                        <i :data-lucide="isHidden ? 'eye' : 'x'"
+                                                            style="width:13px; height:13px; color:var(--text-secondary);"></i>
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div
+
+                                            <!-- Display Comment Text -->
+                                            <div x-show="!editing"
                                                 style="font-size:12.5px; color:var(--text-secondary); margin-top:3px; word-break:break-word;">
-                                                {{ $comment->comment }}
+                                                <span x-text="commentText">{{ $comment->comment }}</span>
+                                            </div>
+
+                                            <!-- Inline Comment Editor -->
+                                            <div x-show="editing" x-cloak style="margin-top:6px;">
+                                                <form @submit.prevent="saveEdit()">
+                                                    <textarea x-model="editText" class="form-control" rows="2" maxlength="1000" required
+                                                        placeholder="Edit your comment..."
+                                                        style="font-size:12.5px; padding:8px 10px; width:100%; border-radius:var(--radius-sm);"></textarea>
+                                                    <div
+                                                        style="display:flex; justify-content:flex-end; gap:6px; margin-top:6px;">
+                                                        <button type="button" class="btn btn-ghost btn-sm"
+                                                            @click="cancelEdit()"
+                                                            style="padding:4px 10px; font-size:11.5px;">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm"
+                                                            :disabled="isSaving || !editText.trim()"
+                                                            style="padding:4px 10px; font-size:11.5px;">
+                                                            <span x-text="isSaving ? 'Saving...' : 'Save'"></span>
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -535,8 +686,10 @@
         </div>
     </div>
 
-    <!-- ===== REPORT POST MODAL ===== -->
-    <div x-data="reportModal()" @open-report-modal.window="open($event.detail.postId)" x-cloak>
+    <!-- ===== REPORT MODAL (Posts & Comments) ===== -->
+    <div x-data="reportModal()"
+        @open-report-modal.window="open($event.detail.targetId || $event.detail.postId, $event.detail.type || 'post')"
+        x-cloak>
         <div x-show="isOpen" class="modal-overlay" @click.self="close()" style="display:flex;"
             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150"
@@ -548,7 +701,7 @@
                             style="width:34px; height:34px; border-radius:8px; background:rgba(245,158,11,0.15); display:flex; align-items:center; justify-content:center;">
                             <i data-lucide="flag" style="color:#f59e0b; width:18px; height:18px;"></i>
                         </div>
-                        <span class="modal-title">Report Post</span>
+                        <span class="modal-title" x-text="type === 'comment' ? 'Report Comment' : 'Report Post'"></span>
                     </div>
                     <button type="button" class="btn-icon" @click="close()">
                         <i data-lucide="x" style="width:16px;height:16px;"></i>
@@ -592,14 +745,15 @@
 
     @push('styles')
         <style>
-            /* Post action dropdown menu item */
-            .post-menu-item {
+            /* Post & Comment action dropdown menu items */
+            .post-menu-item,
+            .comment-menu-item {
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 9px;
                 width: 100%;
-                padding: 9px 14px;
-                font-size: 13px;
+                padding: 8px 13px;
+                font-size: 12.5px;
                 color: var(--text-secondary);
                 background: none;
                 border: none;
@@ -611,13 +765,16 @@
             }
 
             .post-menu-item:hover,
-            .post-menu-item:focus-visible {
+            .post-menu-item:focus-visible,
+            .comment-menu-item:hover,
+            .comment-menu-item:focus-visible {
                 background: rgba(124, 58, 237, 0.08);
                 color: var(--text-primary);
                 outline: none;
             }
 
-            .post-menu-item:active {
+            .post-menu-item:active,
+            .comment-menu-item:active {
                 background: rgba(124, 58, 237, 0.14);
             }
 
@@ -657,7 +814,6 @@
                             const data = await res.json();
                             this.isSaved = data.saved;
                             showToast(data.message, 'success');
-                            // Re-initialize icons for dynamic content
                             if (typeof lucide !== 'undefined') lucide.createIcons();
                         } catch (e) {
                             showToast('Failed to save/unsave post.', 'error');
@@ -725,7 +881,6 @@
                                 return;
                             }
                         } catch (e) {
-                            // User cancelled or Web Share API failed — fall through to clipboard
                             if (e.name === 'AbortError') return;
                         }
 
@@ -734,7 +889,6 @@
                             await navigator.clipboard.writeText(shareUrl);
                             showToast('Link copied to clipboard!', 'success');
                         } catch (e) {
-                            // Final fallback for older browsers
                             const tmp = document.createElement('input');
                             tmp.value = shareUrl;
                             document.body.appendChild(tmp);
@@ -748,24 +902,233 @@
             }
 
             /**
-             * Alpine.js component for the report modal.
+             * Alpine.js component for per-comment actions (edit, delete, hide, copy).
+             */
+            function commentActions(commentId, postId, initialComment, initialEdited, initialHidden) {
+                return {
+                    commentId: commentId,
+                    postId: postId,
+                    commentText: initialComment,
+                    editText: initialComment,
+                    editing: false,
+                    isEdited: initialEdited,
+                    isHidden: initialHidden,
+                    isSaving: false,
+                    menuOpen: false,
+
+                    startEdit() {
+                        this.editText = this.commentText;
+                        this.editing = true;
+                        this.menuOpen = false;
+                    },
+
+                    cancelEdit() {
+                        this.editing = false;
+                        this.editText = this.commentText;
+                    },
+
+                    async saveEdit() {
+                        if (!this.editText.trim() || this.isSaving) return;
+                        this.isSaving = true;
+
+                        try {
+                            const res = await fetch(`/fitness/comments/${this.commentId}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                                body: JSON.stringify({
+                                    comment: this.editText
+                                }),
+                            });
+
+                            if (!res.ok) {
+                                const errData = await res.json().catch(() => ({}));
+                                const msg = errData.message || (errData.errors && errData.errors.comment ? errData.errors
+                                    .comment[0] : 'Failed to update comment.');
+                                showToast(msg, 'error');
+                                return;
+                            }
+
+                            const data = await res.json();
+                            this.commentText = data.comment;
+                            this.isEdited = true;
+                            this.editing = false;
+                            showToast(data.message || 'Comment updated successfully.', 'success');
+                        } catch (e) {
+                            showToast('Failed to update comment.', 'error');
+                        } finally {
+                            this.isSaving = false;
+                        }
+                    },
+
+                    async deleteComment() {
+                        if (!confirm('Are you sure you want to delete this comment?')) {
+                            return;
+                        }
+
+                        try {
+                            const res = await fetch(`/fitness/comments/${this.commentId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                            });
+
+                            if (!res.ok) {
+                                showToast('Failed to delete comment.', 'error');
+                                return;
+                            }
+
+                            const data = await res.json();
+
+                            // Animate removal
+                            const el = document.getElementById('comment-' + this.commentId);
+                            if (el) {
+                                el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                                el.style.opacity = '0';
+                                el.style.transform = 'scale(0.96)';
+                                setTimeout(() => el.remove(), 250);
+                            }
+
+                            // Update comments counter
+                            if (typeof data.comments_count !== 'undefined') {
+                                const countEl = document.getElementById('comments-count-' + this.postId);
+                                if (countEl) {
+                                    countEl.textContent = data.comments_count + (data.comments_count === 1 ? ' Comment' :
+                                        ' Comments');
+                                }
+                            }
+
+                            showToast(data.message || 'Comment deleted.', 'success');
+                        } catch (e) {
+                            showToast('Failed to delete comment.', 'error');
+                        }
+                    },
+
+                    async hideComment() {
+                        try {
+                            const res = await fetch(`/fitness/comments/${this.commentId}/hide`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                            });
+
+                            const data = await res.json();
+                            this.isHidden = true;
+
+                            // Animate hide
+                            const el = document.getElementById('comment-' + this.commentId);
+                            if (el) {
+                                el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                                el.style.opacity = '0';
+                                el.style.transform = 'scale(0.96)';
+                                setTimeout(() => {
+                                    el.style.display = 'none';
+                                }, 250);
+                            }
+
+                            showUndoToast('Comment hidden from your view.', async () => {
+                                await fetch(`/fitness/comments/${this.commentId}/hide`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector(
+                                            'meta[name="csrf-token"]').content,
+                                        'Accept': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                    },
+                                });
+                                this.isHidden = false;
+                                if (el) {
+                                    el.style.display = '';
+                                    el.style.opacity = '1';
+                                    el.style.transform = 'none';
+                                }
+                                showToast('Comment restored to your view.', 'success');
+                            });
+                        } catch (e) {
+                            showToast('Failed to hide comment.', 'error');
+                        }
+                    },
+
+                    async unhideComment() {
+                        try {
+                            const res = await fetch(`/fitness/comments/${this.commentId}/hide`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                            });
+
+                            const data = await res.json();
+                            this.isHidden = false;
+                            showToast(data.message || 'Comment restored to your view.', 'success');
+                        } catch (e) {
+                            showToast('Failed to unhide comment.', 'error');
+                        }
+                    },
+
+                    async copyComment() {
+                        try {
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                await navigator.clipboard.writeText(this.commentText);
+                                showToast('Comment copied to clipboard!', 'success');
+                                return;
+                            }
+                        } catch (e) {
+                            // Fallback below
+                        }
+
+                        try {
+                            const tmp = document.createElement('textarea');
+                            tmp.value = this.commentText;
+                            tmp.style.position = 'fixed';
+                            tmp.style.opacity = '0';
+                            document.body.appendChild(tmp);
+                            tmp.focus();
+                            tmp.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(tmp);
+                            showToast('Comment copied to clipboard!', 'success');
+                        } catch (e) {
+                            showToast('Failed to copy comment.', 'error');
+                        }
+                    },
+                };
+            }
+
+            /**
+             * Alpine.js component for the report modal (supports posts & comments).
              */
             function reportModal() {
                 return {
                     isOpen: false,
-                    postId: null,
+                    targetId: null,
+                    type: 'post',
                     reason: '',
                     details: '',
                     submitting: false,
                     feedbackMsg: '',
                     feedbackOk: false,
 
-                    open(postId) {
-                        this.postId = postId;
+                    open(targetId, type = 'post') {
+                        this.targetId = targetId;
+                        this.type = type;
                         this.reason = '';
                         this.details = '';
                         this.feedbackMsg = '';
                         this.isOpen = true;
+                        if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 50);
                     },
 
                     close() {
@@ -778,8 +1141,12 @@
                         this.submitting = true;
                         this.feedbackMsg = '';
 
+                        const url = this.type === 'comment' ?
+                            `/fitness/comments/${this.targetId}/report` :
+                            `/fitness/${this.targetId}/report`;
+
                         try {
-                            const res = await fetch(`/fitness/${this.postId}/report`, {
+                            const res = await fetch(url, {
                                 method: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

@@ -56,7 +56,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/fitness/{post}/report', [FitnessCommunityController::class, 'report'])->name('fitness.report');
     Route::get('/fitness/{post}/share', [FitnessCommunityController::class, 'share'])->name('fitness.share');
     Route::delete('/fitness/{post}', [FitnessCommunityController::class, 'destroy'])->name('fitness.destroy');
+    Route::put('/fitness/comments/{comment}', [FitnessCommunityController::class, 'updateComment'])->name('fitness.comment.update');
     Route::delete('/fitness/comments/{comment}', [FitnessCommunityController::class, 'destroyComment'])->name('fitness.comment.destroy');
+    Route::post('/fitness/comments/{comment}/hide', [FitnessCommunityController::class, 'hideComment'])->name('fitness.comment.hide');
+    Route::delete('/fitness/comments/{comment}/hide', [FitnessCommunityController::class, 'unhideComment'])->name('fitness.comment.unhide');
+    Route::post('/fitness/comments/{comment}/report', [FitnessCommunityController::class, 'reportComment'])->name('fitness.comment.report');
+    Route::get('/fitness/comments/{comment}/copy', [FitnessCommunityController::class, 'copyComment'])->name('fitness.comment.copy');
 });
 
 require __DIR__.'/auth.php';

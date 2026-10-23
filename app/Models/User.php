@@ -113,6 +113,16 @@ class User extends Authenticatable
         return $this->hasMany(FitnessPostReport::class);
     }
 
+    public function fitnessCommentHides(): HasMany
+    {
+        return $this->hasMany(FitnessCommentHide::class);
+    }
+
+    public function fitnessCommentReports(): HasMany
+    {
+        return $this->hasMany(FitnessCommentReport::class);
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {
