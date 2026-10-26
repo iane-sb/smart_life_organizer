@@ -64,6 +64,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/fitness/comments/{comment}/copy', [FitnessCommunityController::class, 'copyComment'])->name('fitness.comment.copy');
     Route::post('/fitness/comments/{comment}/reply', [FitnessCommunityController::class, 'replyComment'])->name('fitness.comment.reply');
     Route::post('/fitness/comments/{comment}/react', [FitnessCommunityController::class, 'toggleCommentReaction'])->name('fitness.comment.react');
+
+    // Mark Fitness Community notifications as read
+    Route::post('/fitness/notifications/read', function () {
+        request()->user()
+            ->unreadNotifications()
+            ->where('data->type', 'fitness_activity')
+            ->update(['read_at' => now()]);
+
+        return response()->json(['success' => true]);
+    })->name('fitness.notifications.read');
+
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use App\Notifications\FitnessActivityNotification;
 
 class FitnessCommunityController extends Controller
 {
@@ -37,7 +38,7 @@ class FitnessCommunityController extends Controller
             'likes',
             'comments' => function ($q) use ($userId, $showHiddenComments) {
                 $q->whereNull('parent_id');
-                if (! $showHiddenComments) {
+                if (!$showHiddenComments) {
                     $q->whereDoesntHave('hides', function ($hq) use ($userId) {
                         $hq->where('user_id', $userId);
                     });
@@ -47,7 +48,7 @@ class FitnessCommunityController extends Controller
                     'hides',
                     'reactions',
                     'replies' => function ($rq) use ($userId, $showHiddenComments) {
-                        if (! $showHiddenComments) {
+                        if (!$showHiddenComments) {
                             $rq->whereDoesntHave('hides', function ($hq) use ($userId) {
                                 $hq->where('user_id', $userId);
                             });
@@ -81,33 +82,33 @@ class FitnessCommunityController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('caption', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%")
-                         ->orWhere('username', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('username', 'like', "%{$search}%");
+                    });
             });
         }
 
         $posts = $query->paginate(15)->withQueryString();
 
         $workoutTypes = [
-            'all'           => 'All Workouts',
-            'general'       => 'General Fitness',
-            'running'       => 'Running',
+            'all' => 'All Workouts',
+            'general' => 'General Fitness',
+            'running' => 'Running',
             'weightlifting' => 'Weightlifting',
-            'cycling'       => 'Cycling',
-            'hiit'          => 'HIIT / Cardio',
-            'yoga'          => 'Yoga & Stretch',
-            'walking'       => 'Walking',
-            'swimming'      => 'Swimming',
-            'other'         => 'Other',
+            'cycling' => 'Cycling',
+            'hiit' => 'HIIT / Cardio',
+            'yoga' => 'Yoga & Stretch',
+            'walking' => 'Walking',
+            'swimming' => 'Swimming',
+            'other' => 'Other',
         ];
 
         // Summary community metrics
         $totalCommunityPosts = FitnessPost::count();
-        $userPostCount       = FitnessPost::where('user_id', $userId)->count();
-        $userLikesReceived   = FitnessPostLike::whereHas('post', fn($q) => $q->where('user_id', $userId))->count();
-        $hiddenCount         = FitnessPostHide::where('user_id', $userId)->count();
+        $userPostCount = FitnessPost::where('user_id', $userId)->count();
+        $userLikesReceived = FitnessPostLike::whereHas('post', fn($q) => $q->where('user_id', $userId))->count();
+        $hiddenCount = FitnessPostHide::where('user_id', $userId)->count();
         $hiddenCommentsCount = FitnessCommentHide::where('user_id', $userId)->count();
 
         return view('fitness.index', compact(
@@ -131,11 +132,11 @@ class FitnessCommunityController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'caption'          => ['required', 'string', 'max:2000'],
-            'workout_type'     => ['required', 'string', 'in:general,running,weightlifting,cycling,hiit,yoga,walking,swimming,other'],
+            'caption' => ['required', 'string', 'max:2000'],
+            'workout_type' => ['required', 'string', 'in:general,running,weightlifting,cycling,hiit,yoga,walking,swimming,other'],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:1440'],
-            'calories_burned'  => ['nullable', 'integer', 'min:1', 'max:20000'],
-            'image'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'calories_burned' => ['nullable', 'integer', 'min:1', 'max:20000'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         if ($request->hasFile('image')) {
@@ -158,15 +159,15 @@ class FitnessCommunityController extends Controller
         abort_if($post->user_id !== Auth::id(), 403, 'Unauthorized action.');
 
         $workoutTypes = [
-            'general'       => 'General Fitness',
-            'running'       => 'Running',
+            'general' => 'General Fitness',
+            'running' => 'Running',
             'weightlifting' => 'Weightlifting / Gym',
-            'cycling'       => 'Cycling',
-            'hiit'          => 'HIIT / High Intensity',
-            'yoga'          => 'Yoga & Stretching',
-            'walking'       => 'Walking / Hiking',
-            'swimming'      => 'Swimming',
-            'other'         => 'Other Sports',
+            'cycling' => 'Cycling',
+            'hiit' => 'HIIT / High Intensity',
+            'yoga' => 'Yoga & Stretching',
+            'walking' => 'Walking / Hiking',
+            'swimming' => 'Swimming',
+            'other' => 'Other Sports',
         ];
 
         return view('fitness.edit', compact('post', 'workoutTypes'));
@@ -180,11 +181,11 @@ class FitnessCommunityController extends Controller
         abort_if($post->user_id !== Auth::id(), 403, 'Unauthorized action.');
 
         $validated = $request->validate([
-            'caption'          => ['required', 'string', 'max:2000'],
-            'workout_type'     => ['required', 'string', 'in:general,running,weightlifting,cycling,hiit,yoga,walking,swimming,other'],
+            'caption' => ['required', 'string', 'max:2000'],
+            'workout_type' => ['required', 'string', 'in:general,running,weightlifting,cycling,hiit,yoga,walking,swimming,other'],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:1440'],
-            'calories_burned'  => ['nullable', 'integer', 'min:1', 'max:20000'],
-            'image'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'calories_burned' => ['nullable', 'integer', 'min:1', 'max:20000'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         if ($request->hasFile('image')) {
@@ -215,7 +216,7 @@ class FitnessCommunityController extends Controller
         } else {
             FitnessPostLike::create([
                 'fitness_post_id' => $post->id,
-                'user_id'         => $userId,
+                'user_id' => $userId,
             ]);
             $liked = true;
         }
@@ -224,7 +225,7 @@ class FitnessCommunityController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'liked'       => $liked,
+                'liked' => $liked,
                 'likes_count' => $likesCount,
             ]);
         }
@@ -238,17 +239,17 @@ class FitnessCommunityController extends Controller
     public function storeComment(Request $request, FitnessPost $post): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
-            'comment'   => ['required', 'string', 'max:1000'],
+            'comment' => ['required', 'string', 'max:1000'],
             'parent_id' => ['nullable', 'integer', 'exists:fitness_post_comments,id'],
         ]);
 
         $parentId = null;
-        if (! empty($validated['parent_id'])) {
+        if (!empty($validated['parent_id'])) {
             $targetComment = FitnessPostComment::where('fitness_post_id', $post->id)
                 ->where('id', $validated['parent_id'])
                 ->first();
 
-            abort_if(! $targetComment, 422, 'Parent comment does not belong to this post.');
+            abort_if(!$targetComment, 422, 'Parent comment does not belong to this post.');
             abort_if($targetComment->isHiddenBy(Auth::user()), 422, 'Cannot reply to a hidden comment.');
 
             // Enforce single-level nesting
@@ -257,19 +258,44 @@ class FitnessCommunityController extends Controller
 
         $comment = FitnessPostComment::create([
             'fitness_post_id' => $post->id,
-            'parent_id'       => $parentId,
-            'user_id'         => Auth::id(),
-            'comment'         => $validated['comment'],
+            'parent_id' => $parentId,
+            'user_id' => Auth::id(),
+            'comment' => $validated['comment'],
         ]);
 
         $comment->load(['user', 'reactions']);
 
+
+        $actor = Auth::user();
+
+        if ($parentId !== null) {
+            // A reply: notify the author of the comment being replied to.
+            $recipient = $targetComment->user;
+
+            $message = $actor->name . ' replied to your comment.';
+        } else {
+            // A new top-level comment: notify the post author.
+            $recipient = $post->user;
+
+            $message = $actor->name . ' commented on your post.';
+        }
+
+        if ($recipient && $recipient->id !== $actor->id) {
+            $recipient->notify(
+                new FitnessActivityNotification(
+                    $message,
+                    route('fitness.index')
+                )
+            );
+        }
+
+
         if ($request->wantsJson()) {
             return response()->json([
-                'success'        => true,
-                'comment'        => $comment,
-                'parent_id'      => $parentId,
-                'message'        => $parentId ? 'Reply posted!' : 'Comment posted!',
+                'success' => true,
+                'comment' => $comment,
+                'parent_id' => $parentId,
+                'message' => $parentId ? 'Reply posted!' : 'Comment posted!',
                 'comments_count' => FitnessPostComment::where('fitness_post_id', $post->id)->count(),
             ]);
         }
@@ -295,19 +321,19 @@ class FitnessCommunityController extends Controller
 
         $reply = FitnessPostComment::create([
             'fitness_post_id' => $post->id,
-            'parent_id'       => $effectiveParentId,
-            'user_id'         => $userId,
-            'comment'         => $validated['comment'],
+            'parent_id' => $effectiveParentId,
+            'user_id' => $userId,
+            'comment' => $validated['comment'],
         ]);
 
         $reply->load(['user', 'reactions']);
 
         if ($request->wantsJson()) {
             return response()->json([
-                'success'        => true,
-                'reply'          => $reply,
-                'parent_id'      => $effectiveParentId,
-                'message'        => 'Reply posted!',
+                'success' => true,
+                'reply' => $reply,
+                'parent_id' => $effectiveParentId,
+                'message' => 'Reply posted!',
                 'comments_count' => FitnessPostComment::where('fitness_post_id', $post->id)->count(),
             ]);
         }
@@ -332,10 +358,10 @@ class FitnessCommunityController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'success'   => true,
-                'comment'   => $comment->comment,
+                'success' => true,
+                'comment' => $comment->comment,
                 'is_edited' => $comment->isEdited(),
-                'message'   => 'Comment updated successfully.',
+                'message' => 'Comment updated successfully.',
             ]);
         }
 
@@ -372,8 +398,8 @@ class FitnessCommunityController extends Controller
         if ($request->wantsJson()) {
             $remainingCount = FitnessPostComment::where('fitness_post_id', $postId)->count();
             return response()->json([
-                'success'        => true,
-                'message'        => 'Comment deleted.',
+                'success' => true,
+                'message' => 'Comment deleted.',
                 'comments_count' => $remainingCount,
             ]);
         }
@@ -390,13 +416,13 @@ class FitnessCommunityController extends Controller
 
         FitnessCommentHide::firstOrCreate([
             'fitness_post_comment_id' => $comment->id,
-            'user_id'                 => $userId,
+            'user_id' => $userId,
         ]);
 
         if ($request->wantsJson()) {
             return response()->json([
-                'hidden'   => true,
-                'message'  => 'Comment hidden from your view.',
+                'hidden' => true,
+                'message' => 'Comment hidden from your view.',
                 'undo_url' => route('fitness.comment.unhide', $comment),
             ]);
         }
@@ -417,7 +443,7 @@ class FitnessCommunityController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'hidden'  => false,
+                'hidden' => false,
                 'message' => 'Comment restored to your view.',
             ]);
         }
@@ -433,7 +459,7 @@ class FitnessCommunityController extends Controller
         $userId = Auth::id();
 
         $validated = $request->validate([
-            'reason'  => ['required', 'string', 'in:spam,harassment,inappropriate,misinformation,other'],
+            'reason' => ['required', 'string', 'in:spam,harassment,inappropriate,misinformation,other'],
             'details' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -451,10 +477,10 @@ class FitnessCommunityController extends Controller
 
         FitnessCommentReport::create([
             'fitness_post_comment_id' => $comment->id,
-            'user_id'                 => $userId,
-            'reason'                  => $validated['reason'],
-            'details'                 => $validated['details'] ?? null,
-            'status'                  => 'pending',
+            'user_id' => $userId,
+            'reason' => $validated['reason'],
+            'details' => $validated['details'] ?? null,
+            'status' => 'pending',
         ]);
 
         $message = 'Comment reported. Our team will review it. Thank you for helping keep the community safe.';
@@ -509,8 +535,8 @@ class FitnessCommunityController extends Controller
             } else {
                 FitnessCommentReaction::create([
                     'fitness_post_comment_id' => $comment->id,
-                    'user_id'                 => $userId,
-                    'reaction_type'           => $reactionType,
+                    'user_id' => $userId,
+                    'reaction_type' => $reactionType,
                 ]);
                 $userReaction = $reactionType;
             }
@@ -522,11 +548,11 @@ class FitnessCommunityController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'success'         => true,
-                'user_reaction'   => $userReaction,
+                'success' => true,
+                'user_reaction' => $userReaction,
                 'reaction_counts' => $reactionCounts,
                 'total_reactions' => $totalReactions,
-                'message'         => $userReaction ? 'Reaction updated!' : 'Reaction removed.',
+                'message' => $userReaction ? 'Reaction updated!' : 'Reaction removed.',
             ]);
         }
 
@@ -550,7 +576,7 @@ class FitnessCommunityController extends Controller
         } else {
             FitnessPostSave::firstOrCreate([
                 'fitness_post_id' => $post->id,
-                'user_id'         => $userId,
+                'user_id' => $userId,
             ]);
             $saved = true;
             $message = 'Post saved!';
@@ -572,13 +598,13 @@ class FitnessCommunityController extends Controller
 
         FitnessPostHide::firstOrCreate([
             'fitness_post_id' => $post->id,
-            'user_id'         => $userId,
+            'user_id' => $userId,
         ]);
 
         if ($request->wantsJson()) {
             return response()->json([
-                'hidden'   => true,
-                'message'  => 'Post hidden from your feed.',
+                'hidden' => true,
+                'message' => 'Post hidden from your feed.',
                 'undo_url' => route('fitness.unhide', $post),
             ]);
         }
@@ -614,7 +640,7 @@ class FitnessCommunityController extends Controller
         abort_if($post->user_id === $userId, 403, 'You cannot report your own post.');
 
         $validated = $request->validate([
-            'reason'  => ['required', 'string', 'in:spam,harassment,inappropriate,misinformation,other'],
+            'reason' => ['required', 'string', 'in:spam,harassment,inappropriate,misinformation,other'],
             'details' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -632,10 +658,10 @@ class FitnessCommunityController extends Controller
 
         FitnessPostReport::create([
             'fitness_post_id' => $post->id,
-            'user_id'         => $userId,
-            'reason'          => $validated['reason'],
-            'details'         => $validated['details'] ?? null,
-            'status'          => 'pending',
+            'user_id' => $userId,
+            'reason' => $validated['reason'],
+            'details' => $validated['details'] ?? null,
+            'status' => 'pending',
         ]);
 
         $message = 'Post reported. Our team will review it. Thank you for helping keep the community safe.';
@@ -654,8 +680,8 @@ class FitnessCommunityController extends Controller
     {
         return response()->json([
             'title' => 'Fitness Journey by ' . $post->user->name,
-            'text'  => \Illuminate\Support\Str::limit($post->caption, 120),
-            'url'   => route('fitness.index') . '#post-' . $post->id,
+            'text' => \Illuminate\Support\Str::limit($post->caption, 120),
+            'url' => route('fitness.index') . '#post-' . $post->id,
         ]);
     }
 }

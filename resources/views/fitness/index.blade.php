@@ -17,7 +17,7 @@
         style="display:flex; flex-direction:column; gap:20px; max-width:900px; width:100%; margin:0 auto; box-sizing:border-box; min-width:0;">
 
         <!-- Community Metric Cards -->
-        <div class="grid-3 fitness-metrics-grid" style="gap:14px; width:100%; box-sizing:border-box;">
+        {{-- <div class="grid-3 fitness-metrics-grid" style="gap:14px; width:100%; box-sizing:border-box;">
             <div class="glass-card stat-card animate-in">
                 <div class="stat-icon" style="background:rgba(124,58,237,0.18);">
                     <i data-lucide="activity" style="color:#a78bfa;width:24px;height:24px;"></i>
@@ -45,7 +45,7 @@
                     <div class="stat-label">Likes Received</div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <!-- Filter & Category Bar -->
         <div class="glass-card animate-in fitness-filter-card"
@@ -288,10 +288,6 @@
                     <!-- Workout Category + Performance Metrics Bar -->
                     <div class="post-metrics-bar"
                         style="display:flex; gap:8px 12px; padding:8px 18px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); font-size:11.5px; color:var(--text-secondary); flex-wrap:wrap; align-items:center; width:100%; box-sizing:border-box;">
-                        <span class="badge"
-                            style="background:rgba(124,58,237,0.15); color:{{ $post->workout_badge_color }}; border:1px solid {{ $post->workout_badge_color }}40; font-size:10.5px; flex-shrink:0;">
-                            {{ ucfirst($post->workout_type) }}
-                        </span>
 
                         @if ($post->duration_minutes)
                             <div style="display:inline-flex; align-items:center; gap:5px; flex-shrink:0;">
@@ -865,8 +861,10 @@
                                                                                 <button type="button" x-show="count > 0"
                                                                                     @click="toggleReaction(type)"
                                                                                     class="reaction-badge-pill"
-                                                                                    :class="{ 'user-reacted': userReaction ===
-                                                                                            type }">
+                                                                                    :class="{
+                                                                                        'user-reacted': userReaction ===
+                                                                                            type
+                                                                                    }">
                                                                                     <span
                                                                                         x-text="reactionEmoji(type)"></span>
                                                                                     <span x-text="count"
@@ -1129,9 +1127,11 @@
                 font-size: 13px;
                 gap: 6px;
             }
+
             .btn-share-text-short {
                 display: none;
             }
+
             @media (max-width: 640px) {
                 .btn-share-workout {
                     padding: 6px 10px;
@@ -1139,18 +1139,22 @@
                     gap: 4px;
                 }
             }
+
             @media (max-width: 430px) {
                 .btn-share-workout {
                     padding: 6px 8px;
                     font-size: 11.5px;
                 }
+
                 .btn-share-text-full {
                     display: none;
                 }
+
                 .btn-share-text-short {
                     display: inline;
                 }
             }
+
             @media (max-width: 340px) {
                 .btn-share-workout {
                     padding: 6px 6px;
@@ -1194,7 +1198,7 @@
                 background: var(--bg-card);
                 border: 1px solid var(--border);
                 border-radius: var(--radius-md);
-                box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
                 z-index: 100;
                 padding: 4px 0;
                 backdrop-filter: blur(20px);
@@ -1209,7 +1213,7 @@
                 background: var(--bg-card);
                 border: 1px solid var(--border);
                 border-radius: var(--radius-md);
-                box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
                 z-index: 110;
                 padding: 4px 0;
                 backdrop-filter: blur(20px);
@@ -1223,7 +1227,7 @@
                 background: var(--bg-card);
                 border: 1px solid var(--border);
                 border-radius: 24px;
-                box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
                 backdrop-filter: blur(24px);
                 z-index: 120;
                 display: flex;
@@ -1353,47 +1357,60 @@
                 .fitness-container {
                     gap: 14px !important;
                 }
+
                 .fitness-metrics-grid {
                     gap: 8px !important;
                 }
+
                 .fitness-filter-card {
                     padding: 10px 12px !important;
                 }
+
                 .post-header {
                     padding: 12px 12px 10px 12px !important;
                 }
+
                 .post-metrics-bar {
                     padding: 8px 12px !important;
                     gap: 6px 10px !important;
                 }
+
                 .post-caption {
                     padding: 12px 12px 10px 12px !important;
                     font-size: 13px !important;
                 }
+
                 .post-image-wrap {
                     padding: 0 12px 12px 12px !important;
                 }
+
                 .post-actions-bar {
                     padding: 8px 12px !important;
                 }
+
                 .post-comments-thread {
                     padding: 12px 10px !important;
                 }
+
                 .comment-item-card {
                     padding: 8px 8px !important;
                 }
+
                 .reply-item-card {
                     padding: 6px 6px !important;
                 }
+
                 .replies-thread-container {
                     margin-left: 6px !important;
                     padding-left: 6px !important;
                     gap: 6px !important;
                 }
+
                 .reaction-popover {
                     left: auto !important;
                     right: 0 !important;
                 }
+
                 .modal-metrics-grid {
                     grid-template-columns: 1fr !important;
                     gap: 10px !important;
