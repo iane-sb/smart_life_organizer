@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -44,6 +46,9 @@ class ProfileController extends Controller
 
         // Handle avatar upload if provided
         if ($request->hasFile('avatar_file')) {
+            if ($user->avatar && !str_starts_with($user->avatar, 'http://') && !str_starts_with($user->avatar, 'https://') && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
             $path = $request->file('avatar_file')->store('avatars', 'public');
             $validated['avatar'] = $path;
         }
@@ -79,6 +84,34 @@ class ProfileController extends Controller
         return Redirect::to($redirectUrl)
             ->with('status', 'profile-updated')
             ->with('success', 'Profile settings updated successfully!');
+    }
+
+    /**
+     * Upload and update user avatar directly (e.g. from the crop modal).
+     */
+    public function uploadAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'avatar_file' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+
+        // Safely remove previous local avatar file if exists
+        if ($user->avatar && !str_starts_with($user->avatar, 'http://') && !str_starts_with($user->avatar, 'https://') && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar_file')->store('avatars', 'public');
+        $user->avatar = $path;
+        $user->save();
+
+        return response()->json([
+            'success'    => true,
+            'avatar_url' => $user->avatar_url,
+            'avatar'     => $path,
+            'message'    => 'Profile photo updated successfully!',
+        ]);
     }
 
     /**

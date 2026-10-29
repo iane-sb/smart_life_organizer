@@ -35,7 +35,7 @@ class ProfileUpdateRequest extends FormRequest
             'phone'                  => ['nullable', 'string', 'max:30'],
             'birthday'               => ['nullable', 'date'],
             'bio'                    => ['nullable', 'string', 'max:1000'],
-            'avatar_file'            => ['nullable', 'image', 'max:2048'],
+            'avatar_file'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'avatar'                 => ['nullable', 'string', 'max:500'],
             'theme_preference'       => ['nullable', 'string', Rule::in(['dark', 'light', 'system'])],
             'language'               => ['nullable', 'string', Rule::in(['en', 'es', 'fr', 'de', 'ja'])],

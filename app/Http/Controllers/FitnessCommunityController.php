@@ -219,6 +219,17 @@ class FitnessCommunityController extends Controller
                 'user_id' => $userId,
             ]);
             $liked = true;
+
+            // Notify the post author when someone else likes their post.
+            $postAuthor = $post->user;
+            if ($postAuthor && $postAuthor->id !== $userId) {
+                $postAuthor->notify(
+                    new FitnessActivityNotification(
+                        Auth::user()->name . ' liked your post.',
+                        route('fitness.index')
+                    )
+                );
+            }
         }
 
         $likesCount = $post->likes()->count();
@@ -327,6 +338,18 @@ class FitnessCommunityController extends Controller
         ]);
 
         $reply->load(['user', 'reactions']);
+
+        // Notify the author of the comment being replied to (if they are not the actor).
+        $actor = Auth::user();
+        $commentAuthor = $comment->user;
+        if ($commentAuthor && $commentAuthor->id !== $actor->id) {
+            $commentAuthor->notify(
+                new FitnessActivityNotification(
+                    $actor->name . ' replied to your comment.',
+                    route('fitness.index')
+                )
+            );
+        }
 
         if ($request->wantsJson()) {
             return response()->json([

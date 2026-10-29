@@ -1850,7 +1850,8 @@
                             auth()->check() && auth()->user()->unreadNotifications()
                                 ->where('data->type', 'fitness_activity')->exists()
                         )
-                        <span class="fitness-notification-dot" aria-label="Unread notifications"</span>
+                        <span class="fitness-notification-dot" aria-label="Unread notifications"
+                            title="Unread notifications"></span>
                     @endif
 
                 </a>
@@ -1875,7 +1876,7 @@
                 <a href="{{ route('profile.edit') }}"
                     class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                     <i data-lucide="user"></i>
-                    Profile
+                    Profile and Settings
                 </a>
 
                 <form method="POST" action="{{ route('logout') }}">
@@ -1970,14 +1971,15 @@
                 <span class="dock-icon-wrapper">
                     <i data-lucide="dumbbell"></i>
 
-                    {{-- Temporary visual notification indicator --}}
+                    {{-- Unread fitness notification indicator --}}
                     @if (
                             auth()->check() && auth()->user()->unreadNotifications()
                                 ->where('data->type', 'fitness_activity')->exists()
                         )
-                        <span class="dock-notification-dot" aria-label="Unread notifications"></span>
+                        <span class="dock-notification-dot" aria-label="Unread notifications"
+                            title="Unread notifications"></span>
                     @endif
-                    
+
                 </span>
                 <span>Community</span>
             </a>

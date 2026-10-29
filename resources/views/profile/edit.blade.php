@@ -18,7 +18,8 @@
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
             <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
                 <div style="position: relative; flex-shrink: 0;">
-                    <img src="{{ $user->avatar_url }}"
+                    <img id="profile-hero-avatar"
+                         src="{{ $user->avatar_url }}"
                          alt="{{ $user->name }}"
                          style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid #7c3aed; box-shadow: 0 0 25px rgba(124,58,237,0.4);">
                     <span style="position: absolute; bottom: 2px; right: 2px; width: 15px; height: 15px; border-radius: 50%; background: #10b981; border: 2px solid var(--bg-primary);"></span>
@@ -141,4 +142,64 @@
     </div>
 
 </div>
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('vendor/cropperjs/cropper.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" crossorigin="anonymous">
+<style>
+    /* Cropper.js custom theme styling to match Smart Life Organizer */
+    .cropper-view-box {
+        outline: 2px solid #7c3aed;
+        outline-color: rgba(124, 58, 237, 0.95);
+    }
+    .cropper-line {
+        background-color: #a78bfa;
+    }
+    .cropper-point {
+        background-color: #7c3aed;
+        width: 8px;
+        height: 8px;
+    }
+    .cropper-modal {
+        background-color: rgba(13, 15, 26, 0.82);
+    }
+    [data-theme="light"] .cropper-modal {
+        background-color: rgba(15, 23, 42, 0.72);
+    }
+    .crop-circle-preview {
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2.5px solid #7c3aed;
+        box-shadow: 0 0 16px rgba(124, 58, 237, 0.35);
+        background: var(--bg-secondary);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .crop-circle-preview img,
+    .crop-circle-preview canvas {
+        max-width: 100% !important;
+        border-radius: 50%;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('vendor/cropperjs/cropper.min.js') }}"></script>
+<script>
+    if (typeof Cropper === 'undefined') {
+        const cdnScript = document.createElement('script');
+        cdnScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js';
+        cdnScript.crossOrigin = 'anonymous';
+        document.head.appendChild(cdnScript);
+    }
+</script>
+@endpush
 @endsection
